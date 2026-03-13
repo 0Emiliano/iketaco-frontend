@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --brand-orange: #f28500;
+  --brand-orange-light: #f9a825;
+  --brand-orange-dark: #d4700a;
+  --bg-black: #0a0a0a;
+  --card-bg: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────────── */
+html,
+body {
+  background-color: var(--bg-black);
+  color: var(--text-primary);
+  font-family: var(--font-body), 'Nunito', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Mobile-first max-width container */
+body > * {
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #111;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ─── Custom utilities ──────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  .bg-orange-gradient {
+    background: linear-gradient(135deg, #f28500 0%, #d4700a 100%);
+  }
+
+  .shadow-btn {
+    box-shadow: 0 4px 15px rgba(242, 133, 0, 0.4);
+  }
+
+  .shadow-card {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* ─── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+/* ─── Font utility classes ──────────────────────────────────────────────────── */
+.font-display {
+  font-family: var(--font-display), 'Bebas Neue', Impact, 'Arial Black', sans-serif;
+  letter-spacing: 0.03em;
+}
+.font-body {
+  font-family: var(--font-body), 'Nunito', 'Segoe UI', sans-serif;
+}
+
+/* Safe area for bottom nav */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 8px);
+}
+
+/* ─── Badge pulse animation ─────────────────────────────────────────────────── */
+@keyframes badgePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.animate-badge-pulse {
+  animation: badgePulse 0.3s ease-out;
+}
