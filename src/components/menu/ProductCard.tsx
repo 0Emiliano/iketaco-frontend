@@ -1,23 +1,17 @@
-import Link from 'next/link'
-import type { Product } from '@/types'
+'use client'
 
-const EMOJI_MAP: Record<string, string> = {
-  'combo-ke-tacos': '🌮',
-  'combo-queso': '🧀',
-  'combo-dorado': '✨',
-  'tacos-de-birria': '🔥',
-  'quesbirrias': '🫓',
-}
+import Link from 'next/link'
+import type { Producto } from '@/types'
 
 interface ProductCardProps {
-  product: Product
+  producto: Producto
   index?: number
 }
 
-export default function ProductCard({ product, index = 0 }: ProductCardProps) {
+export default function ProductCard({ producto, index = 0 }: ProductCardProps) {
   return (
     <Link
-      href={`/product/${product.slug}`}
+      href={`/product/${producto.id}`}
       className="flex items-center gap-4 rounded-2xl p-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] group animate-slide-up"
       style={{
         background: '#1A1A1A',
@@ -26,43 +20,43 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         border: '1px solid rgba(255,255,255,0.04)',
       }}
     >
-      {/* Image / emoji placeholder */}
+      {/* Imagen */}
       <div
         className="w-24 h-24 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center text-4xl shadow-md"
-        style={{ background: product.imageGradient }}
+        style={{ background: '#2A2A2A' }}
       >
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%)' }}
-        />
-        <span className="relative z-10 select-none">
-          {EMOJI_MAP[product.slug] ?? '🌮'}
-        </span>
-        {product.popular && (
-          <span
-            className="absolute top-1.5 left-1.5 text-xs font-black px-1.5 py-0.5 rounded-md"
-            style={{ background: '#F28500', color: 'white', fontSize: '9px', letterSpacing: '0.05em' }}
-          >
-            POPULAR
-          </span>
+        {producto.imagen_url ? (
+          <img
+            src={producto.imagen_url}
+            alt={producto.nombre}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="relative z-10 select-none">🌮</span>
         )}
       </div>
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-white font-extrabold text-base leading-tight">{product.name}</h3>
+        <h3 className="text-white font-extrabold text-base leading-tight">{producto.nombre}</h3>
         <p className="text-gray-400 text-sm mt-1 leading-snug line-clamp-2 font-medium">
-          {product.description}
+          {producto.descripcion}
         </p>
         <p className="font-display text-xl mt-2" style={{ color: '#F28500' }}>
-          ${product.price}
+          ${producto.precio_base}
         </p>
       </div>
 
       {/* Arrow */}
       <div className="text-gray-600 group-hover:text-[#F28500] transition-colors flex-shrink-0 pr-1">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M9 18l6-6-6-6"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
     </Link>

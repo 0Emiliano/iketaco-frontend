@@ -1,19 +1,20 @@
 'use client'
 
-import type { Product, CategoryKey } from '@/types'
+import type { Producto } from '@/types'
 import ProductCard from './ProductCard'
 
 interface ProductListProps {
-  products: Product[]
-  category: CategoryKey
+  productos: Producto[]
+  categoriaId: number | null
   search: string
 }
 
-export default function ProductList({ products, category, search }: ProductListProps) {
-  const filtered = products.filter((p) => {
-    const matchCategory = category === 'todo' || p.category === category
-    const matchSearch = search.trim() === '' || p.name.toLowerCase().includes(search.toLowerCase())
-    return matchCategory && matchSearch
+export default function ProductList({ productos = [], categoriaId, search }: ProductListProps) {
+  const filtered = productos.filter((p) => {
+    const matchCategoria = categoriaId === null || p.categorias.id === categoriaId
+    const matchSearch =
+      search.trim() === '' || p.nombre.toLowerCase().includes(search.toLowerCase())
+    return matchCategoria && matchSearch
   })
 
   if (filtered.length === 0) {
@@ -35,8 +36,8 @@ export default function ProductList({ products, category, search }: ProductListP
 
   return (
     <div className="flex flex-col gap-3">
-      {filtered.map((product, index) => (
-        <ProductCard key={product.id} product={product} index={index} />
+      {filtered.map((producto, index) => (
+        <ProductCard key={producto.id} producto={producto} index={index} />
       ))}
     </div>
   )

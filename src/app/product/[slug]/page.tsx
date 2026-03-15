@@ -1,50 +1,47 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
 import NavComponent from '@/components/ui/NavComponent'
 import ProductDetail from '@/components/product/ProductDetail'
-import { getProductBySlug, PRODUCTS } from '@/data/products'
+import { getProductoById } from '@/data/products'
+import type { Producto } from '@/types'
 
-// ─── Static params (for SSG) ──────────────────────────────────────────────────
-export async function generateStaticParams() {
-  return PRODUCTS.map((p) => ({ slug: p.slug }))
-}
+export default function ProductPage() {
+  const params = useParams()
+  const id = parseInt(params['slug'] as string)
+  const [producto, setProducto] = useState<Producto | null>(null)
+  const [loading, setLoading] = useState(true)
 
-// ─── Dynamic metadata ─────────────────────────────────────────────────────────
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}): Promise<Metadata> {
-  const { slug } = await params
-  const product = getProductBySlug(slug)
-  if (!product) return { title: 'Producto no encontrado' }
-  return {
-    title: `${product.name} – I KE TACOS`,
-    description: product.description,
+  useEffect(() => {
+    if (isNaN(id)) {
+      setLoading(false)
+      return
+    }
+    getProductoById(id)
+      .then(setProducto)
+      .catch(() => setProducto(null))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <p className="text-gray-400">Cargando...</p>
+      </div>
+    )
   }
-}
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-export default async function ProductPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
-  const { slug } = await params
-  const product = getProductBySlug(slug)
-
-  if (!product) notFound()
+  if (!producto) return notFound()
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
-      {/* Transparent nav over hero */}
       <div className="relative z-50">
         <NavComponent />
       </div>
-
-      {/* Push content below fixed nav */}
       <div className="pt-16">
-        <ProductDetail product={product} />
+        <ProductDetail producto={producto} />
       </div>
     </div>
   )
