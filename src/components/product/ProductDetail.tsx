@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useCart } from '@/context/CartContext'
 import type { Producto } from '@/types'
 
 interface ProductDetailProps {
@@ -11,8 +12,14 @@ interface ProductDetailProps {
 export default function ProductDetail({ producto }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const router = useRouter()
+  const { dispatch } = useCart()
 
   const total = (parseFloat(producto.precio_base) * quantity).toFixed(2)
+
+  const handleAgregar = () => {
+    dispatch({ type: 'ADD_ITEM', producto, quantity })
+    router.push('/cart')
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
@@ -65,7 +72,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
 
       {/* Botón agregar */}
       <div
-        className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-4 max-w-lg mx-auto"
+        className="fixed bottom-0 left-0 right-0 px-4 pb-24 pt-4 max-w-lg mx-auto"
         style={{ background: 'linear-gradient(to top, #0A0A0A 80%, transparent)' }}
       >
         <div className="flex items-center justify-between mb-3">
@@ -73,7 +80,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
           <span className="text-white font-extrabold text-xl">${total}</span>
         </div>
         <button
-          onClick={() => router.push('/cart')}
+          onClick={handleAgregar}
           className="w-full py-4 rounded-2xl text-white font-extrabold text-lg"
           style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
         >
