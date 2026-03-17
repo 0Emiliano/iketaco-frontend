@@ -39,9 +39,9 @@ export default function RegisterPage() {
 
     try {
       await apiClient.post('/auth/register', {
-        nombre: name,
         email,
         password,
+        rol: 'cliente',
       })
 
       setSuccessMessage('Registro exitoso. Redirigiendo a iniciar sesión...')

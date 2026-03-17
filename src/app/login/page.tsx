@@ -37,14 +37,29 @@ export default function LoginPage() {
         password,
       })
 
-      const token = response.data?.token
-      if (token) {
-        localStorage.setItem('iketaco_token', token)
-      }
+      const { accessToken, usuario } = response.data
+
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('usuario', JSON.stringify(usuario))
 
       setSuccessMessage('¡Sesión iniciada correctamente! Redirigiendo...')
       setTimeout(() => {
-        router.push('/menu')
+        switch (usuario.rol) {
+          case 'gerente':
+            router.push('/admin')
+            break
+          case 'cajero':
+            router.push('/cajero')
+            break
+          case 'cocinero':
+            router.push('/cocina')
+            break
+          case 'repartidor':
+            router.push('/entregas')
+            break
+          default:
+            router.push('/menu')
+        }
       }, 500)
     } catch (err: any) {
       console.error(err)
@@ -140,9 +155,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-4 text-center text-slate-300 text-xs">
-          <p className="text-white/70">
-            Inicio de sesión.
-          </p>
+          <p className="text-white/70">Inicio de sesión.</p>
         </div>
       </main>
     </div>
