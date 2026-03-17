@@ -27,9 +27,39 @@ const navItems = [
     label: 'Menú',
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="5" width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <rect x="3" y="11" width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <rect x="3" y="17" width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <rect
+          x="3"
+          y="5"
+          width="18"
+          height="2"
+          rx="1"
+          fill={active ? 'currentColor' : 'none'}
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <rect
+          x="3"
+          y="11"
+          width="18"
+          height="2"
+          rx="1"
+          fill={active ? 'currentColor' : 'none'}
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <rect
+          x="3"
+          y="17"
+          width="18"
+          height="2"
+          rx="1"
+          fill={active ? 'currentColor' : 'none'}
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </svg>
     ),
   },
@@ -47,7 +77,15 @@ const navItems = [
           fill={active ? 'currentColor' : 'none'}
           fillOpacity={active ? 0.2 : 0}
         />
-        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <line
+          x1="3"
+          y1="6"
+          x2="21"
+          y2="6"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
         <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
@@ -59,8 +97,13 @@ export default function BottomNav() {
   const pathname = usePathname()
   const { totalItems } = useCart()
 
-  // Hide on confirmation page
-  if (pathname === '/confirmacion') return null
+  // Hide on confirmation and auth pages
+  if (
+    pathname === '/confirmacion' ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register')
+  )
+    return null
 
   return (
     <nav
@@ -74,10 +117,7 @@ export default function BottomNav() {
     >
       <div className="flex items-center justify-around px-2 pb-safe">
         {navItems.map((item) => {
-          const isActive =
-            item.href === '/'
-              ? pathname === '/'
-              : pathname.startsWith(item.href)
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
 
           return (
             <Link

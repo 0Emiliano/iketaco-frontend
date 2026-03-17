@@ -36,6 +36,14 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
           </span>
         </Link>
 
+        <Link
+          href="/login"
+          className="items-center rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-black/20"
+          style={{ background: 'rgba(0,0,0,0.25)' }}
+        >
+          Iniciar sesión
+        </Link>
+
         {/* Cart Icon */}
         <Link
           href="/cart"
@@ -43,13 +51,7 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
           style={{ background: 'rgba(0,0,0,0.15)' }}
           aria-label={`Carrito - ${totalItems} productos`}
         >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            className="text-white"
-          >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
             <path
               d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"
               stroke="currentColor"
@@ -58,8 +60,21 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
               strokeLinejoin="round"
               fill="rgba(255,255,255,0.15)"
             />
-            <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <line
+              x1="3"
+              y1="6"
+              x2="21"
+              y2="6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M16 10a4 4 0 01-8 0"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
           </svg>
 
           {/* Badge */}
