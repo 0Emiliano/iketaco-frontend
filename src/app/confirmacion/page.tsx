@@ -24,7 +24,10 @@ function ConfirmacionContent() {
 
       {orden && (
         <p className="text-gray-400 text-sm font-bold mb-1">
-          Número de orden: <span style={{ color: '#F28500' }}>{orden}</span>
+          Número de orden:{' '}
+          <span style={{ color: '#F28500' }}>
+            {orden ? orden.replace(/ORD-\d{8}-/, 'ORD-') : ''}
+          </span>
         </p>
       )}
 
