@@ -43,7 +43,10 @@ export default function CartPage() {
 
             <div className="flex flex-col gap-3">
               {state.items.map((item, index) => (
-                <div key={item.producto.id} style={{ animationDelay: `${index * 0.07}s` }}>
+                <div
+                  key={`${item.tipo}-${item.tipo === 'producto' ? item.producto.id : item.combo.id}`}
+                  style={{ animationDelay: `${index * 0.07}s` }}
+                >
                   <CartItemComponent item={item} />
                 </div>
               ))}

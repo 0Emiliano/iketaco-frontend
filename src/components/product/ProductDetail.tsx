@@ -12,18 +12,17 @@ interface ProductDetailProps {
 export default function ProductDetail({ producto }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const router = useRouter()
-  const { dispatch } = useCart()
+  const { addProducto } = useCart()
 
   const total = (parseFloat(producto.precio_base) * quantity).toFixed(2)
 
   const handleAgregar = () => {
-    dispatch({ type: 'ADD_ITEM', producto, quantity })
+    addProducto(producto, quantity)
     router.push('/cart')
   }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
-      {/* Hero imagen */}
       <div
         className="w-full h-56 flex items-center justify-center text-8xl"
         style={{ background: '#1A1A1A' }}
@@ -39,7 +38,6 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
         )}
       </div>
 
-      {/* Contenido */}
       <div className="flex-1 px-4 pt-6 pb-32 max-w-lg mx-auto w-full">
         <h1 className="text-white font-extrabold text-2xl">{producto.nombre}</h1>
         <p className="text-gray-400 text-sm mt-2">{producto.descripcion}</p>
@@ -47,7 +45,6 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
           ${producto.precio_base}
         </p>
 
-        {/* Cantidad */}
         <div className="mt-8">
           <p className="text-white font-extrabold text-lg mb-4">Cantidad</p>
           <div className="flex items-center justify-center gap-8">
@@ -70,7 +67,6 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
         </div>
       </div>
 
-      {/* Botón agregar */}
       <div
         className="fixed bottom-0 left-0 right-0 px-4 pb-24 pt-4 max-w-lg mx-auto"
         style={{ background: 'linear-gradient(to top, #0A0A0A 80%, transparent)' }}

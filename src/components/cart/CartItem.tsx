@@ -9,8 +9,14 @@ interface CartItemProps {
 
 export default function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeItem } = useCart()
-  const { producto, quantity } = item
-  const lineTotal = (parseFloat(producto.precio_base) * quantity).toFixed(2)
+
+  const isProducto = item.tipo === 'producto'
+  const id = isProducto ? item.producto.id : item.combo.id
+  const nombre = isProducto ? item.producto.nombre : item.combo.nombre
+  const precio = isProducto ? item.producto.precio_base : item.combo.precio
+  const imagen = isProducto ? item.producto.imagen_url : item.combo.imagen_url
+  const tipo = item.tipo
+  const lineTotal = (parseFloat(precio) * item.quantity).toFixed(2)
 
   return (
     <div
@@ -26,12 +32,8 @@ export default function CartItem({ item }: CartItemProps) {
         className="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center text-3xl"
         style={{ background: '#2A2A2A' }}
       >
-        {producto.imagen_url ? (
-          <img
-            src={producto.imagen_url}
-            alt={producto.nombre}
-            className="w-full h-full object-cover"
-          />
+        {imagen ? (
+          <img src={imagen} alt={nombre} className="w-full h-full object-cover" />
         ) : (
           <span>🌮</span>
         )}
@@ -40,12 +42,21 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Nombre + controles */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-white font-extrabold text-sm leading-tight">{producto.nombre}</h3>
+          <div>
+            <h3 className="text-white font-extrabold text-sm leading-tight">{nombre}</h3>
+            {!isProducto && (
+              <span
+                className="text-xs font-bold px-2 py-0.5 rounded-full mt-0.5 inline-block"
+                style={{ background: 'rgba(242,133,0,0.2)', color: '#F28500' }}
+              >
+                Combo
+              </span>
+            )}
+          </div>
           <button
-            onClick={() => removeItem(producto.id)}
+            onClick={() => removeItem(id, tipo)}
             className="text-gray-600 hover:text-red-400 transition-colors flex-shrink-0 mt-0.5 p-1 rounded-lg"
             style={{ background: 'rgba(255,255,255,0.04)' }}
-            aria-label={`Eliminar ${producto.nombre}`}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
               <path
@@ -60,25 +71,22 @@ export default function CartItem({ item }: CartItemProps) {
 
         <div className="flex items-center gap-2 mt-2.5">
           <button
-            onClick={() => updateQuantity(producto.id, quantity - 1)}
+            onClick={() => updateQuantity(id, tipo, item.quantity - 1)}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-base transition-all active:scale-90"
             style={{ background: 'linear-gradient(135deg, #F28500, #D4700A)' }}
           >
             −
           </button>
-
           <span className="text-white font-extrabold text-base w-6 text-center tabular-nums">
-            {quantity}
+            {item.quantity}
           </span>
-
           <button
-            onClick={() => updateQuantity(producto.id, quantity + 1)}
+            onClick={() => updateQuantity(id, tipo, item.quantity + 1)}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-base transition-all active:scale-90"
             style={{ background: 'linear-gradient(135deg, #F28500, #D4700A)' }}
           >
             +
           </button>
-
           <span className="ml-auto font-display text-xl" style={{ color: '#F28500' }}>
             ${lineTotal}
           </span>

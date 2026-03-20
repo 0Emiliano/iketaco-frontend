@@ -59,13 +59,23 @@ export interface Promocion {
 }
 
 // ─── Carrito ─────────────────────────────────────────────────────────────────
-export interface CartItem {
+export interface CartItemProducto {
+  tipo: 'producto'
   producto: Producto
   quantity: number
 }
 
+export interface CartItemCombo {
+  tipo: 'combo'
+  combo: Combo
+  quantity: number
+}
+
+export type CartItem = CartItemProducto | CartItemCombo
+
 export type CartAction =
-  | { type: 'ADD_ITEM'; producto: Producto; quantity: number }
-  | { type: 'REMOVE_ITEM'; productoId: number }
-  | { type: 'UPDATE_QUANTITY'; productoId: number; quantity: number }
+  | { type: 'ADD_PRODUCTO'; producto: Producto; quantity: number }
+  | { type: 'ADD_COMBO'; combo: Combo; quantity: number }
+  | { type: 'REMOVE_ITEM'; itemId: number; itemTipo: 'producto' | 'combo' }
+  | { type: 'UPDATE_QUANTITY'; itemId: number; itemTipo: 'producto' | 'combo'; quantity: number }
   | { type: 'CLEAR_CART' }
