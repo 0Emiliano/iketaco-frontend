@@ -5,19 +5,26 @@ import NavComponent from '@/components/ui/NavComponent'
 import SearchBar from '@/components/menu/SearchBar'
 import CategoryFilter from '@/components/menu/CategoryFilter'
 import ProductList from '@/components/menu/ProductList'
-import { getCategorias, getProductos } from '@/data/products'
-import type { Categoria, Producto } from '@/types'
+import ComboList from '@/components/menu/ComboList'
+import { getCategorias, getProductos, getCombos } from '@/data/products'
+import type { Categoria, Producto, Combo } from '@/types'
+
+const CATEGORIA_COMBOS_ID = 3 // ID de la categoría Combos en la BD
 
 export default function MenuPage() {
   const [search, setSearch] = useState('')
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [productos, setProductos] = useState<Producto[]>([])
+  const [combos, setCombos] = useState<Combo[]>([])
   const [activaCategoriaId, setActivaCategoriaId] = useState<number | null>(null)
 
   useEffect(() => {
     getCategorias().then(setCategorias).catch(console.error)
     getProductos().then(setProductos).catch(console.error)
+    getCombos().then(setCombos).catch(console.error)
   }, [])
+
+  const mostrandoCombos = activaCategoriaId === CATEGORIA_COMBOS_ID
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
@@ -43,7 +50,11 @@ export default function MenuPage() {
           />
         </div>
 
-        <ProductList productos={productos} categoriaId={activaCategoriaId} search={search} />
+        {mostrandoCombos ? (
+          <ComboList combos={combos} search={search} />
+        ) : (
+          <ProductList productos={productos} categoriaId={activaCategoriaId} search={search} />
+        )}
       </main>
     </div>
   )
