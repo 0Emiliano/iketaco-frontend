@@ -64,32 +64,34 @@ const navItems = [
     ),
   },
   {
-    href: '/cart',
-    label: 'Carrito',
+    href: '/mis-pedidos',
+    label: 'Mis Pedidos',
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path
-          d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
           fill={active ? 'currentColor' : 'none'}
-          fillOpacity={active ? 0.2 : 0}
+          fillOpacity={active ? 0.15 : 0}
         />
-        <line
-          x1="3"
-          y1="6"
-          x2="21"
-          y2="6"
+        <rect
+          x="9"
+          y="3"
+          width="6"
+          height="4"
+          rx="1"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
+          fill={active ? 'currentColor' : 'none'}
+          fillOpacity={active ? 0.2 : 0}
         />
-        <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
-    badge: true,
   },
 ]
 
@@ -97,11 +99,11 @@ export default function BottomNav() {
   const pathname = usePathname()
   const { totalItems } = useCart()
 
-  // Hide on confirmation and auth pages
   if (
     pathname === '/confirmacion' ||
     pathname.startsWith('/login') ||
-    pathname.startsWith('/register')
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/cocina')
   )
     return null
 
@@ -126,7 +128,6 @@ export default function BottomNav() {
               className="relative flex flex-col items-center gap-1 py-3 px-5 rounded-xl transition-all duration-200 active:scale-90"
               style={{ color: isActive ? '#F28500' : '#6B7280' }}
             >
-              {/* Active indicator dot */}
               {isActive && (
                 <span
                   className="absolute top-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
@@ -134,21 +135,8 @@ export default function BottomNav() {
                 />
               )}
 
-              {/* Icon */}
-              <span className="relative">
-                {item.icon(isActive)}
-                {/* Cart badge */}
-                {item.badge && totalItems > 0 && (
-                  <span
-                    className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs font-black flex items-center justify-center animate-scale-in"
-                    style={{ background: '#F28500', fontSize: '10px' }}
-                  >
-                    {totalItems > 9 ? '9+' : totalItems}
-                  </span>
-                )}
-              </span>
+              <span className="relative">{item.icon(isActive)}</span>
 
-              {/* Label */}
               <span
                 className="text-xs font-bold tracking-wide transition-all"
                 style={{

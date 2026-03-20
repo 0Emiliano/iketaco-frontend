@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
@@ -10,14 +11,13 @@ export default function OrderSummary() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [sinLogin, setSinLogin] = useState(false)
 
   const handleOrder = async () => {
     setError('')
-
-    // Verificar que hay token
     const token = localStorage.getItem('accessToken')
     if (!token) {
-      router.push('/login')
+      setSinLogin(true) // ← mostrar mensaje en lugar de redirigir
       return
     }
 
@@ -100,6 +100,32 @@ export default function OrderSummary() {
         </a>
         <p className="text-gray-500 text-xs font-medium mt-1">¿Olvidaste algo?</p>
       </div>
+
+      {sinLogin && (
+        <div
+          className="rounded-2xl p-4 mb-4 text-center"
+          style={{ background: 'rgba(242,133,0,0.1)', border: '1px solid rgba(242,133,0,0.3)' }}
+        >
+          <p className="text-white font-extrabold text-base mb-1">Necesitas iniciar sesión</p>
+          <p className="text-gray-400 text-sm mb-3">Para realizar tu pedido necesitas una cuenta</p>
+          <div className="flex gap-2">
+            <Link
+              href="/login"
+              className="flex-1 py-2.5 rounded-xl text-white font-extrabold text-sm text-center"
+              style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/register"
+              className="flex-1 py-2.5 rounded-xl font-extrabold text-sm text-center"
+              style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+            >
+              Registrarse
+            </Link>
+          </div>
+        </div>
+      )}
 
       <button
         onClick={handleOrder}
