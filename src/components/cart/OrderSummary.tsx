@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
@@ -13,13 +13,20 @@ export default function OrderSummary() {
   const [error, setError] = useState('')
   const [sinLogin, setSinLogin] = useState(false)
 
+  // Pre-check login state on mount
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (!token) setSinLogin(true)
+  }, [])
+
   const handleOrder = async () => {
     setError('')
     const token = localStorage.getItem('accessToken')
     if (!token) {
-      setSinLogin(true) // ← mostrar mensaje en lugar de redirigir
+      setSinLogin(true)
       return
     }
+    setSinLogin(false)
 
     setLoading(true)
 
@@ -91,13 +98,13 @@ export default function OrderSummary() {
       {error && <p className="text-red-400 text-sm font-semibold text-center mb-4">{error}</p>}
 
       <div className="text-center mb-5">
-        <a
+        <Link
           href="/menu"
           className="text-sm font-bold underline underline-offset-4 transition-opacity hover:opacity-70"
           style={{ color: '#F28500' }}
         >
           + Agregar más Productos
-        </a>
+        </Link>
         <p className="text-gray-500 text-xs font-medium mt-1">¿Olvidaste algo?</p>
       </div>
 

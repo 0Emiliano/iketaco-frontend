@@ -3,6 +3,7 @@ import { Bebas_Neue, Nunito } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import BottomNav from '@/components/ui/BottomNav'
+import Toaster from '@/components/ui/Toaster'
 
 // ─── Google Fonts ─────────────────────────────────────────────────────────────
 const bebasNeue = Bebas_Neue({
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="min-h-screen bg-[#0A0A0A] font-body">
             {children}
             <BottomNav />
+            <Toaster />
           </div>
         </CartProvider>
       </body>

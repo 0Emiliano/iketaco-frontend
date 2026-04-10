@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
+import { toast } from '@/lib/toast'
 import type { Producto } from '@/types'
 
 interface ProductDetailProps {
@@ -18,7 +19,8 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
 
   const handleAgregar = () => {
     addProducto(producto, quantity)
-    router.push('/cart')
+    toast(`${quantity}x ${producto.nombre} agregado al carrito`)
+    router.back()
   }
 
   return (

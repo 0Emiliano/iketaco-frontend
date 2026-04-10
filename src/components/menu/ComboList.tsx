@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import type { Combo } from '@/types'
 import { useCart } from '@/context/CartContext'
+import { toast } from '@/lib/toast'
 
 interface ComboListProps {
   combos: Combo[]
@@ -12,7 +12,6 @@ interface ComboListProps {
 
 export default function ComboList({ combos = [], search }: ComboListProps) {
   const { addCombo } = useCart()
-  const router = useRouter()
   const [cantidades, setCantidades] = useState<Record<number, number>>({})
 
   const getCantidad = (id: number) => cantidades[id] ?? 1
@@ -21,8 +20,9 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
     setCantidades((prev) => ({ ...prev, [id]: Math.max(1, val) }))
 
   const handleAgregar = (combo: Combo) => {
-    addCombo(combo, getCantidad(combo.id))
-    router.push('/cart')
+    const qty = getCantidad(combo.id)
+    addCombo(combo, qty)
+    toast(`${qty}x ${combo.nombre} agregado al carrito`)
   }
 
   const filtered = combos.filter(

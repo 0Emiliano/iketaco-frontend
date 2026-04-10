@@ -41,13 +41,22 @@ function ConfirmacionContent() {
         Tu pedido está siendo preparado 🌮
       </p>
 
-      <Link
-        href="/menu"
-        className="px-8 py-4 rounded-2xl text-white font-extrabold text-lg transition-all active:scale-95 hover:opacity-90"
-        style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
-      >
-        Volver al Menú
-      </Link>
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <Link
+          href="/mis-pedidos"
+          className="w-full py-4 rounded-2xl text-white font-extrabold text-lg text-center transition-all active:scale-95 hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+        >
+          Ver mis pedidos
+        </Link>
+        <Link
+          href="/menu"
+          className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
+          style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+        >
+          Volver al Menú
+        </Link>
+      </div>
     </div>
   )
 }

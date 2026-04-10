@@ -51,7 +51,7 @@ export default function CocinaPage() {
       if (err?.response?.status === 401) {
         router.push('/login')
       } else {
-        setError('Error al cargar las comandas')
+        setError('No se pudieron cargar las comandas. Verifica tu conexión.')
       }
     } finally {
       setLoading(false)
@@ -140,9 +140,27 @@ export default function CocinaPage() {
       </div>
 
       <main className="pt-20 pb-8 px-4 max-w-4xl mx-auto">
-        {error && <p className="text-red-400 text-sm font-bold text-center mb-4">{error}</p>}
+        {error && (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4"
+              style={{ background: '#1A1A1A' }}
+            >
+              😕
+            </div>
+            <p className="text-white font-extrabold text-lg mb-1">Sin conexión</p>
+            <p className="text-gray-400 text-sm mb-5">{error}</p>
+            <button
+              onClick={fetchOrdenes}
+              className="px-6 py-3 rounded-2xl text-white font-extrabold text-sm transition-all active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
 
-        {ordenes.length === 0 ? (
+        {!error && ordenes.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-4"
@@ -155,7 +173,9 @@ export default function CocinaPage() {
               Las nuevas órdenes aparecerán aquí automáticamente
             </p>
           </div>
-        ) : (
+        )}
+
+        {!error && ordenes.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {ordenes.map((orden) => (
               <div
