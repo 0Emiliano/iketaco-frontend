@@ -50,7 +50,7 @@ export default function MisPedidosPage() {
     }
 
     apiClient
-      .get('/orders/my', {
+      .get('/orders/mis-pedidos', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setOrdenes(res.data))
