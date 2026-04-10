@@ -301,7 +301,19 @@ export default function CajeroPage() {
             className="w-full max-w-lg rounded-3xl p-5"
             style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.1)' }}
           >
-            <h2 className="text-white font-extrabold text-xl mb-1">Registrar Pago</h2>
+            <div className="flex items-start justify-between mb-1">
+              <h2 className="text-white font-extrabold text-xl">Registrar Pago</h2>
+              <button
+                onClick={() => setPagoOrden(null)}
+                aria-label="Cerrar modal"
+                className="text-gray-400 hover:text-white transition-colors rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(255,255,255,0.06)', width: 36, height: 36, minWidth: 36 }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
             <p className="text-gray-400 text-sm mb-4">
               {pagoOrden.numero.replace(/ORD-\d{8}-/, 'ORD-')} —{' '}
               <span style={{ color: '#F28500' }}>${parseFloat(pagoOrden.total).toFixed(2)}</span>

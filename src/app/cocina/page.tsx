@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api/client'
+import RefreshDot from '@/components/ui/RefreshDot'
 
 interface OrdenCocina {
   id: number
@@ -114,8 +115,10 @@ export default function CocinaPage() {
           >
             {ordenes.length} activas
           </span>
+          <RefreshDot intervalMs={15000} />
           <button
             onClick={fetchOrdenes}
+            aria-label="Actualizar comandas"
             className="text-gray-400 hover:text-white transition-colors p-2 rounded-lg"
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >

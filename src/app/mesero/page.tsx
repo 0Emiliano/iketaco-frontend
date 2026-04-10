@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api/client'
+import RefreshDot from '@/components/ui/RefreshDot'
 
 interface Orden {
   id: number
@@ -133,6 +134,7 @@ export default function MeseroPage() {
           >
             {ordenes.length} activas
           </span>
+          <RefreshDot intervalMs={15000} />
           <button
             onClick={fetchOrdenes}
             className="text-gray-400 hover:text-white p-2 rounded-lg transition"

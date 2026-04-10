@@ -38,25 +38,20 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      await apiClient.post('/auth/register', {
-        email,
-        password,
-        rol: 'cliente',
-      })
-
-      setSuccessMessage('Registro exitoso. Redirigiendo a iniciar sesión...')
-      setTimeout(() => {
-        router.push('/login')
-      }, 700)
+      const res = await apiClient.post('/auth/login', { email, password })
+      const { accessToken, usuario } = res.data
+      localStorage.setItem('accessToken', accessToken)
+      localStorage.setItem('usuario', JSON.stringify(usuario))
+      setSuccessMessage('¡Bienvenido! Redirigiendo...')
+      setTimeout(() => router.push('/menu'), 600)
     } catch (err: any) {
-      console.error(err)
       const serverMessage = err?.response?.data?.message || err?.response?.data?.error
-      if (serverMessage) {
+      if (err?.response?.status === 401 || err?.response?.status === 403) {
+        setError('Esta cuenta no tiene acceso. Contacta al gerente.')
+      } else if (serverMessage) {
         setError(String(serverMessage))
-      } else if (err?.response?.status === 401) {
-        setError('No autorizado. Revisa tus datos o usa otro correo.')
       } else {
-        setError('No se pudo crear la cuenta. Intenta de nuevo con datos válidos.')
+        setError('No se pudo iniciar sesión. Verifica tus datos.')
       }
     } finally {
       setLoading(false)
@@ -77,9 +72,9 @@ export default function RegisterPage() {
         <div className="bg-[#131313] border border-white/10 rounded-3xl p-5 shadow-card">
           <div className="mb-6">
             <p className="text-xs uppercase tracking-[0.2em] text-orange-400 font-bold">Cuenta</p>
-            <h1 className="text-3xl font-display mt-2 text-white">Regístrate</h1>
+            <h1 className="text-3xl font-display mt-2 text-white">Acceder</h1>
             <p className="mt-2 text-sm text-slate-300">
-              Crea tu cuenta para hacer pedidos y ver el historial.
+              Ingresa tus credenciales proporcionadas por el gerente.
             </p>
           </div>
 
@@ -145,7 +140,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full rounded-xl bg-gradient-to-r from-[#F28500] via-[#E68510] to-[#D4700A] py-3 text-sm font-bold uppercase tracking-wide text-white shadow-btn transition hover:opacity-95 disabled:opacity-50"
             >
-              {loading ? 'Registrando...' : 'Crear cuenta'}
+              {loading ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
 
@@ -158,7 +153,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="mt-4 text-center text-slate-300 text-xs">
-          <p className="text-white/70">Registro de usuairos nuevos.</p>
+          <p className="text-white/70">Acceso para personal de I KE TACOS.</p>
         </div>
       </main>
     </div>

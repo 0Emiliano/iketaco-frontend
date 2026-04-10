@@ -55,10 +55,11 @@ export default function CartItem({ item }: CartItemProps) {
           </div>
           <button
             onClick={() => removeItem(id, tipo)}
-            className="text-gray-600 hover:text-red-400 transition-colors flex-shrink-0 mt-0.5 p-1 rounded-lg"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
+            aria-label={`Eliminar ${nombre} del carrito`}
+            className="text-gray-500 hover:text-red-400 transition-colors flex-shrink-0 rounded-xl flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.06)', width: 36, height: 36, minWidth: 36 }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path
                 d="M18 6L6 18M6 6l12 12"
                 stroke="currentColor"
