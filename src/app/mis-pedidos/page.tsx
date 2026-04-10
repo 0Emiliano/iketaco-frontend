@@ -53,7 +53,9 @@ export default function MisPedidosPage() {
       .get('/orders/mis-pedidos', {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setOrdenes(res.data))
+      .then((res) => {
+        setOrdenes(res.data?.items ?? [])
+      })
       .catch((err) => {
         if (err?.response?.status === 401) {
           router.push('/login')
@@ -76,10 +78,10 @@ export default function MisPedidosPage() {
 
   const getResumen = (orden: OrdenHistorial) => {
     const items = [
-      ...orden.orden_detalles.map((d) => `${d.cantidad}x ${d.productos.nombre}`),
-      ...orden.orden_combos.map((c) => `${c.cantidad}x ${c.combos.nombre}`),
+      ...(orden.orden_detalles ?? []).map((d) => `${d.cantidad}x ${d.productos?.nombre ?? ''}`),
+      ...(orden.orden_combos ?? []).map((c) => `${c.cantidad}x ${c.combos?.nombre ?? ''}`),
     ]
-    return items.join(', ')
+    return items.filter(Boolean).join(', ') || '—'
   }
 
   if (loading) {

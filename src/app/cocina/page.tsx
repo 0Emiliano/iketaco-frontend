@@ -45,7 +45,7 @@ export default function CocinaPage() {
         headers: { Authorization: `Bearer ${token}` },
       })
       // Solo mostrar pendientes y en preparación
-      const activas = res.data.filter((o: OrdenCocina) => ESTADOS_COCINA.includes(o.estado))
+      const activas = (res.data?.items ?? []).filter((o: OrdenCocina) => ESTADOS_COCINA.includes(o.estado))
       setOrdenes(activas)
     } catch (err: any) {
       if (err?.response?.status === 401) {
