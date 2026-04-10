@@ -1,8 +1,9 @@
 import axios from 'axios'
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://i-ke-api.up.railway.app'
+
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'https://i-ke-api.up.railway.app',
-  withCredentials: true,
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -21,12 +22,14 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (res) => res,
   async (error) => {
+    if (typeof window === 'undefined') return Promise.reject(error)
+
     const original = error.config
     if (error?.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
         const refreshRes = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL ?? 'https://i-ke-api.up.railway.app'}/auth/refresh`,
+          `${BASE_URL}/auth/refresh`,
           {},
           { withCredentials: true }
         )
@@ -37,7 +40,7 @@ apiClient.interceptors.response.use(
       } catch {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('usuario')
-        if (typeof window !== 'undefined') window.location.href = '/login'
+        window.location.href = '/login'
       }
     }
     return Promise.reject(error)
