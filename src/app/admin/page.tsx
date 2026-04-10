@@ -4,18 +4,23 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api/client'
 
-interface Dashboard {
-  totalOrdenes: number
-  totalVentas: number
-  ordenesActivas: number
-  productosMasVendidos: { nombre: string; cantidad: number; total: number }[]
+// Shapes reales del backend
+interface DashboardData {
+  servicioActivo: { id: number; estado: string; fecha_inicio: string } | null
+  resumenHoy: {
+    totalVentas: number
+    totalOrdenes: number
+    ticketPromedio: number
+  }
+  ordenesPorEstado: Record<string, number>
+  alertasStock: number
 }
 
 interface Servicio {
   id: number
   estado: 'abierto' | 'cerrado'
-  fechaInicio: string
-  fechaFin: string | null
+  fecha_inicio: string
+  fecha_fin: string | null
 }
 
 interface Orden {
@@ -29,11 +34,11 @@ interface Orden {
 }
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente: { label: 'Pendiente', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
-  en_preparacion: { label: 'En preparación', color: '#F28500', bg: 'rgba(242,133,0,0.15)' },
-  lista: { label: 'Lista', color: '#27AE60', bg: 'rgba(39,174,96,0.15)' },
-  entregada: { label: 'Entregada', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
-  cancelada: { label: 'Cancelada', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' },
+  pendiente:      { label: 'Pendiente',     color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
+  en_preparacion: { label: 'En preparación',color: '#F28500', bg: 'rgba(242,133,0,0.15)' },
+  lista:          { label: 'Lista',          color: '#27AE60', bg: 'rgba(39,174,96,0.15)' },
+  entregada:      { label: 'Entregada',     color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
+  cancelada:      { label: 'Cancelada',     color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' },
 }
 
 type Tab = 'dashboard' | 'ordenes'
@@ -41,7 +46,7 @@ type Tab = 'dashboard' | 'ordenes'
 export default function AdminPage() {
   const router = useRouter()
   const [tab, setTab] = useState<Tab>('dashboard')
-  const [dashboard, setDashboard] = useState<Dashboard | null>(null)
+  const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [servicio, setServicio] = useState<Servicio | null>(null)
   const [servicioError, setServicioError] = useState('')
   const [ordenes, setOrdenes] = useState<Orden[]>([])
@@ -63,6 +68,10 @@ export default function AdminPage() {
     try {
       const res = await apiClient.get('/reports/dashboard')
       setDashboard(res.data)
+      // El dashboard incluye el servicio activo
+      if (res.data?.servicioActivo) {
+        setServicio(res.data.servicioActivo)
+      }
     } catch {
       // silent
     }
@@ -80,7 +89,7 @@ export default function AdminPage() {
   const fetchOrdenes = useCallback(async () => {
     try {
       const res = await apiClient.get('/orders')
-      setOrdenes(res.data)
+      setOrdenes(res.data?.items ?? [])
     } catch {
       // silent
     }
@@ -98,12 +107,13 @@ export default function AdminPage() {
     setServicioLoading(true)
     try {
       if (servicio?.estado === 'abierto') {
-        const res = await apiClient.post('/services/close')
-        setServicio(res.data)
+        await apiClient.post('/services/close')
+        setServicio(null)
       } else {
         const res = await apiClient.post('/services/open')
         setServicio(res.data)
       }
+      fetchDashboard()
     } catch (err: any) {
       setServicioError(err?.response?.data?.error ?? 'Error al cambiar servicio')
     } finally {
@@ -135,6 +145,8 @@ export default function AdminPage() {
     )
   }
 
+  const servicioAbierto = servicio?.estado === 'abierto'
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
       {/* Header */}
@@ -153,11 +165,11 @@ export default function AdminPage() {
           <div
             className="text-xs font-bold px-3 py-1 rounded-full"
             style={{
-              background: servicio?.estado === 'abierto' ? 'rgba(39,174,96,0.2)' : 'rgba(231,76,60,0.2)',
-              color: servicio?.estado === 'abierto' ? '#27AE60' : '#E74C3C',
+              background: servicioAbierto ? 'rgba(39,174,96,0.2)' : 'rgba(231,76,60,0.2)',
+              color: servicioAbierto ? '#27AE60' : '#E74C3C',
             }}
           >
-            {servicio?.estado === 'abierto' ? '● Servicio abierto' : '● Servicio cerrado'}
+            {servicioAbierto ? '● Abierto' : '● Cerrado'}
           </div>
           <button
             onClick={logout}
@@ -171,14 +183,14 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div
-        className="fixed top-[57px] left-0 right-0 z-40 px-4 flex gap-1"
-        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: 8, paddingTop: 8 }}
+        className="fixed top-[57px] left-0 right-0 z-40 px-4 flex gap-1 pb-2 pt-2"
+        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
       >
         {(['dashboard', 'ordenes'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="px-4 py-2 rounded-xl text-sm font-bold transition-all capitalize"
+            className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
             style={{
               background: tab === t ? 'rgba(242,133,0,0.2)' : 'rgba(255,255,255,0.05)',
               color: tab === t ? '#F28500' : '#9CA3AF',
@@ -198,10 +210,10 @@ export default function AdminPage() {
               className="rounded-2xl p-4"
               style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <h2 className="text-white font-extrabold text-base mb-3">Control de Servicio</h2>
-              {servicio?.estado === 'abierto' && (
+              <h2 className="text-white font-extrabold text-base mb-2">Control de Servicio</h2>
+              {servicioAbierto && servicio?.fecha_inicio && (
                 <p className="text-gray-400 text-xs mb-3">
-                  Abierto desde {formatFecha(servicio.fechaInicio)}
+                  Abierto desde {formatFecha(servicio.fecha_inicio)}
                 </p>
               )}
               {servicioError && (
@@ -212,32 +224,27 @@ export default function AdminPage() {
                 disabled={servicioLoading}
                 className="w-full py-3 rounded-xl text-white font-extrabold text-sm transition-all active:scale-95 disabled:opacity-50"
                 style={{
-                  background:
-                    servicio?.estado === 'abierto'
-                      ? 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)'
-                      : 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)',
+                  background: servicioAbierto
+                    ? 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)'
+                    : 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)',
                 }}
               >
                 {servicioLoading
                   ? 'Procesando...'
-                  : servicio?.estado === 'abierto'
+                  : servicioAbierto
                   ? 'Cerrar Servicio'
                   : 'Abrir Servicio'}
               </button>
             </div>
 
-            {/* Stats */}
-            {dashboard && (
+            {/* Stats del día */}
+            {dashboard?.resumenHoy && (
               <>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'Órdenes hoy', value: dashboard.totalOrdenes, color: '#F28500' },
-                    { label: 'Activas', value: dashboard.ordenesActivas, color: '#27AE60' },
-                    {
-                      label: 'Ventas',
-                      value: `$${Number(dashboard.totalVentas).toFixed(0)}`,
-                      color: '#2980B9',
-                    },
+                    { label: 'Órdenes hoy',   value: dashboard.resumenHoy.totalOrdenes,               color: '#F28500' },
+                    { label: 'Ticket prom.',   value: `$${dashboard.resumenHoy.ticketPromedio.toFixed(0)}`, color: '#27AE60' },
+                    { label: 'Ventas hoy',     value: `$${dashboard.resumenHoy.totalVentas.toFixed(0)}`,    color: '#2980B9' },
                   ].map((s) => (
                     <div
                       key={s.label}
@@ -252,35 +259,44 @@ export default function AdminPage() {
                   ))}
                 </div>
 
-                {/* Top products */}
-                {dashboard.productosMasVendidos?.length > 0 && (
+                {/* Estado de órdenes activas */}
+                {dashboard.ordenesPorEstado && Object.keys(dashboard.ordenesPorEstado).length > 0 && (
                   <div
                     className="rounded-2xl p-4"
                     style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <h2 className="text-white font-extrabold text-base mb-3">
-                      Productos más vendidos hoy
-                    </h2>
-                    <div className="space-y-2">
-                      {dashboard.productosMasVendidos.slice(0, 5).map((p, i) => (
-                        <div key={p.nombre} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
+                    <h2 className="text-white font-extrabold text-base mb-3">Órdenes activas</h2>
+                    <div className="flex flex-col gap-2">
+                      {Object.entries(dashboard.ordenesPorEstado).map(([estado, count]) => {
+                        const cfg = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG['pendiente']
+                        return (
+                          <div key={estado} className="flex items-center justify-between">
                             <span
-                              className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black"
-                              style={{ background: 'rgba(242,133,0,0.2)', color: '#F28500' }}
+                              className="text-xs font-bold px-2 py-1 rounded-full"
+                              style={{ background: cfg.bg, color: cfg.color }}
                             >
-                              {i + 1}
+                              {cfg.label}
                             </span>
-                            <span className="text-white text-sm font-semibold">{p.nombre}</span>
+                            <span className="text-white font-extrabold">{count}</span>
                           </div>
-                          <div className="text-right">
-                            <span className="text-gray-400 text-xs">{p.cantidad} uds</span>
-                            <span className="text-white text-sm font-bold ml-3">
-                              ${Number(p.total).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Alertas de stock */}
+                {dashboard.alertasStock > 0 && (
+                  <div
+                    className="rounded-2xl p-4 flex items-center gap-3"
+                    style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
+                  >
+                    <span className="text-2xl">⚠️</span>
+                    <div>
+                      <p className="text-white font-extrabold text-sm">Alerta de inventario</p>
+                      <p className="text-red-300 text-xs mt-0.5">
+                        {dashboard.alertasStock} ingrediente{dashboard.alertasStock > 1 ? 's' : ''} con stock bajo
+                      </p>
                     </div>
                   </div>
                 )}
@@ -336,10 +352,7 @@ export default function AdminPage() {
                     <div
                       key={orden.id}
                       className="rounded-2xl p-4"
-                      style={{
-                        background: '#1A1A1A',
-                        border: '1px solid rgba(255,255,255,0.06)',
-                      }}
+                      style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span

@@ -22,7 +22,7 @@ interface Orden {
 interface Servicio {
   id: number
   estado: 'abierto' | 'cerrado'
-  fechaInicio: string
+  fecha_inicio: string
 }
 
 export default function CajeroPage() {

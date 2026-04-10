@@ -56,7 +56,7 @@ export default function MeseroPage() {
   const fetchOrdenes = useCallback(async () => {
     try {
       const res = await apiClient.get('/orders')
-      const activas = res.data.filter((o: Orden) => ESTADOS_ACTIVOS.includes(o.estado))
+      const activas = (res.data?.items ?? []).filter((o: Orden) => ESTADOS_ACTIVOS.includes(o.estado))
       setOrdenes(activas)
       setError('')
     } catch (err: any) {
