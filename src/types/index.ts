@@ -58,6 +58,30 @@ export interface Promocion {
   } | null
 }
 
+// ─── Órdenes ─────────────────────────────────────────────────────────────────
+export type TipoServicio = 'mostrador' | 'domicilio' | 'evento'
+
+export interface OrdenProductoItem {
+  productoId: number
+  cantidad: number
+  notas?: string
+}
+
+export interface OrdenComboItem {
+  comboId: number
+  cantidad: number
+}
+
+export interface OrdenRequest {
+  tipoServicio: TipoServicio
+  direccionEntrega?: string
+  telefonoCliente?: string
+  nombreCliente?: string
+  notas?: string
+  productos: OrdenProductoItem[]
+  combos: OrdenComboItem[]
+}
+
 // ─── Carrito ─────────────────────────────────────────────────────────────────
 export interface CartItemProducto {
   tipo: 'producto'
