@@ -132,6 +132,11 @@ export default function LoginPage() {
               >
                 {showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
               </button>
+              <div className="mt-1 text-right">
+                <Link href="/forgot-password" className="text-xs text-slate-400 hover:text-orange-300 transition">
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </div>
 
             {error && <p className="text-xs text-red-300">{error}</p>}
