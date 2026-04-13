@@ -7,12 +7,11 @@ import apiClient from '@/lib/api/client'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail]               = useState('')
+  const [password, setPassword]         = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState('')
   const [successMessage, setSuccessMessage] = useState('')
 
   const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -22,10 +21,6 @@ export default function RegisterPage() {
     setError('')
     setSuccessMessage('')
 
-    if (!name.trim()) {
-      setError('Ingresa tu nombre. No puede estar vacío.')
-      return
-    }
     if (!isValidEmail(email)) {
       setError('Ingresa un correo electrónico válido.')
       return
@@ -36,22 +31,27 @@ export default function RegisterPage() {
     }
 
     setLoading(true)
-
     try {
-      const res = await apiClient.post('/auth/login', { email, password })
-      const { accessToken, usuario } = res.data
+      // 1. Registro público como cliente
+      await apiClient.post('/auth/register', { email, password, rol: 'cliente' })
+
+      // 2. Login automático
+      const loginRes = await apiClient.post('/auth/login', { email, password })
+      const { accessToken, usuario } = loginRes.data
+
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('usuario', JSON.stringify(usuario))
-      setSuccessMessage('¡Bienvenido! Redirigiendo...')
-      setTimeout(() => router.push('/menu'), 600)
+
+      setSuccessMessage('¡Cuenta creada! Redirigiendo al menú...')
+      setTimeout(() => router.push('/menu'), 500)
     } catch (err: any) {
       const serverMessage = err?.response?.data?.message || err?.response?.data?.error
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        setError('Esta cuenta no tiene acceso. Contacta al gerente.')
+      if (err?.response?.status === 409) {
+        setError('Ya existe una cuenta con ese correo. Intenta iniciar sesión.')
       } else if (serverMessage) {
         setError(String(serverMessage))
       } else {
-        setError('No se pudo iniciar sesión. Verifica tus datos.')
+        setError('No se pudo crear la cuenta. Intenta de nuevo.')
       }
     } finally {
       setLoading(false)
@@ -72,28 +72,13 @@ export default function RegisterPage() {
         <div className="bg-[#131313] border border-white/10 rounded-3xl p-5 shadow-card">
           <div className="mb-6">
             <p className="text-xs uppercase tracking-[0.2em] text-orange-400 font-bold">Cuenta</p>
-            <h1 className="text-3xl font-display mt-2 text-white">Acceder</h1>
+            <h1 className="text-3xl font-display mt-2 text-white">Crea tu cuenta</h1>
             <p className="mt-2 text-sm text-slate-300">
-              Ingresa tus credenciales proporcionadas por el gerente.
+              Regístrate para hacer pedidos en I KE TACOS BIRRIA.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1" htmlFor="name">
-                Nombre
-              </label>
-              <input
-                id="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                type="text"
-                required
-                className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
-                placeholder="Tu nombre"
-              />
-            </div>
-
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1" htmlFor="email">
                 Correo electrónico
@@ -101,7 +86,7 @@ export default function RegisterPage() {
               <input
                 id="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 type="email"
                 required
                 className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
@@ -116,7 +101,7 @@ export default function RegisterPage() {
               <input
                 id="password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 type={showPassword ? 'text' : 'password'}
                 required
                 minLength={8}
@@ -140,7 +125,7 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full rounded-xl bg-gradient-to-r from-[#F28500] via-[#E68510] to-[#D4700A] py-3 text-sm font-bold uppercase tracking-wide text-white shadow-btn transition hover:opacity-95 disabled:opacity-50"
             >
-              {loading ? 'Ingresando...' : 'Ingresar'}
+              {loading ? 'Creando cuenta...' : 'Crear cuenta'}
             </button>
           </form>
 
@@ -153,7 +138,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="mt-4 text-center text-slate-300 text-xs">
-          <p className="text-white/70">Acceso para personal de I KE TACOS.</p>
+          <p className="text-white/70">Registro gratuito para clientes.</p>
         </div>
       </main>
     </div>

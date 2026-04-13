@@ -57,6 +57,9 @@ export default function LoginPage() {
           case 'mesero':
             router.push('/mesero')
             break
+          case 'repartidor':
+            router.push('/entregas')
+            break
           default:
             router.push('/menu')
         }
