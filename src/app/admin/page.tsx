@@ -310,7 +310,8 @@ export default function AdminPage() {
                 { label: 'Cajero',   icon: '💳', href: '/cajero' },
                 { label: 'Productos', icon: '🌮', href: '/admin/menu' },
                 { label: 'Mesero',   icon: '🛵', href: '/mesero' },
-                { label: 'Reportes', icon: '📊', href: '/admin/reports' },
+                { label: 'Reportes',  icon: '📊', href: '/admin/reports'    },
+                { label: 'Empleados', icon: '👥', href: '/admin/employees' },
               ].map((l) => (
                 <a
                   key={l.href}
