@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
+import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete'
 import type { TipoServicio, OrdenRequest } from '@/types'
 
 // ─── Selector card (shared for tipo-servicio and metodo-pago) ────────────────
@@ -83,30 +84,57 @@ export default function OrderSummary() {
 
   // Tipo de servicio
   const [tipoServicio,   setTipoServicio]   = useState<TipoServicio>('mostrador')
-  const [direccion,      setDireccion]      = useState('')
   const [telefono,       setTelefono]       = useState('')
   const [errorDireccion, setErrorDireccion] = useState('')
   const [errorTelefono,  setErrorTelefono]  = useState('')
+  const [coordEntrega,   setCoordEntrega]   = useState<{ lat: number; lng: number } | null>(null)
   const esDomicilio = tipoServicio === 'domicilio'
 
   // Método de pago
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
+
+  // ── Google Places Autocomplete ──────────────────────────────────────────────
+  const {
+    ready,
+    value: addressValue,
+    setValue: setAddressValue,
+    suggestions: { status: suggestStatus, data: suggestions },
+    clearSuggestions,
+  } = usePlacesAutocomplete({
+    requestOptions: { componentRestrictions: { country: 'mx' } },
+    debounce: 300,
+    // Don't init until the component mounts (window.google must be available)
+    initOnMount: typeof window !== 'undefined' && typeof window.google !== 'undefined',
+  })
+
+  const handleSelectAddress = async (description: string) => {
+    setAddressValue(description, false) // false = don't re-fetch suggestions
+    clearSuggestions()
+    setCoordEntrega(null)
+    try {
+      const results = await getGeocode({ address: description })
+      const { lat, lng } = await getLatLng(results[0])
+      setCoordEntrega({ lat, lng })
+    } catch { /* coordinates are optional — delivery still works with text address */ }
+  }
 
   // Pre-check login on mount
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) setSinLogin(true)
   }, [])
 
-  // Reset delivery errors when switching service type
+  // Reset delivery fields when switching service type
   useEffect(() => {
     setErrorDireccion('')
     setErrorTelefono('')
-  }, [tipoServicio])
+    setAddressValue('', false)
+    setCoordEntrega(null)
+  }, [tipoServicio, setAddressValue])
 
   const validateDelivery = (): boolean => {
     let valid = true
     if (esDomicilio) {
-      if (direccion.trim().length < 5) {
+      if (addressValue.trim().length < 5) {
         setErrorDireccion('La dirección debe tener al menos 5 caracteres.')
         valid = false
       } else {
@@ -142,8 +170,12 @@ export default function OrderSummary() {
       const body: OrdenRequest = {
         tipoServicio, productos, combos,
         ...(esDomicilio && {
-          direccionEntrega: direccion.trim(),
+          direccionEntrega: addressValue.trim(),
           telefonoCliente:  telefono.trim(),
+          ...(coordEntrega && {
+            latitudEntrega:  coordEntrega.lat,
+            longitudEntrega: coordEntrega.lng,
+          }),
         }),
       }
 
@@ -243,12 +275,71 @@ export default function OrderSummary() {
         {/* Delivery fields */}
         {esDomicilio && (
           <div className="mt-4 flex flex-col gap-3" style={{ animation: 'fadeSlideDown 0.2s ease both' }}>
-            <Field
-              id="direccion" label="Dirección de entrega *"
-              value={direccion} onChange={setDireccion}
-              placeholder="Calle, número, colonia…" maxLength={300}
-              error={errorDireccion}
-            />
+
+            {/* Address autocomplete */}
+            <div className="flex flex-col gap-1 relative">
+              <label htmlFor="direccion" className="text-xs font-semibold text-slate-300">
+                Dirección de entrega *
+              </label>
+              <input
+                id="direccion"
+                type="text"
+                value={addressValue}
+                onChange={(e) => {
+                  setAddressValue(e.target.value)
+                  setCoordEntrega(null) // reset coords if user types manually
+                }}
+                placeholder={ready ? 'Calle, número, colonia…' : 'Cargando…'}
+                disabled={!ready}
+                autoComplete="off"
+                maxLength={300}
+                className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition disabled:opacity-50"
+                style={{ borderColor: errorDireccion ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)' }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = '#F28500')}
+                onBlur={(e) => (e.currentTarget.style.borderColor = errorDireccion ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)')}
+              />
+
+              {/* Suggestions dropdown */}
+              {suggestStatus === 'OK' && suggestions.length > 0 && (
+                <ul
+                  className="absolute left-0 right-0 z-50 rounded-2xl overflow-hidden"
+                  style={{
+                    top: 'calc(100% + 4px)',
+                    background: '#2A2A2A',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  {suggestions.map(({ place_id, description }) => (
+                    <li
+                      key={place_id}
+                      onMouseDown={(e) => e.preventDefault()} // prevent blur before click
+                      onClick={() => handleSelectAddress(description)}
+                      className="flex items-start gap-2.5 px-4 py-3 cursor-pointer transition-colors"
+                      style={{
+                        color: '#E5E7EB',
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(242,133,0,0.1)')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <span className="mt-0.5 text-sm">📍</span>
+                      <span className="text-sm font-medium leading-snug">{description}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {errorDireccion && (
+                <p className="text-xs text-red-400 font-medium">{errorDireccion}</p>
+              )}
+              {coordEntrega && !errorDireccion && (
+                <p className="text-xs font-semibold" style={{ color: '#27AE60' }}>
+                  ✓ Ubicación confirmada en el mapa
+                </p>
+              )}
+            </div>
+
             <Field
               id="telefono" label="Teléfono de contacto *"
               value={telefono} onChange={setTelefono}

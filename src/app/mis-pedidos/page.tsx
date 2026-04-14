@@ -30,6 +30,10 @@ interface OrdenHistorial {
   total: string
   creado_en: string
   nombre_cliente: string | null
+  tipo_servicio: string | null
+  direccion_entrega: string | null
+  latitud_entrega: number | string | null
+  longitud_entrega: number | string | null
   orden_detalles: OrdenDetalle[]
   orden_combos: OrdenCombo[]
 }
@@ -482,9 +486,28 @@ export default function MisPedidosPage() {
                   </div>
 
                   {/* Items summary */}
-                  <p className="text-gray-300 text-sm font-medium line-clamp-2 mb-3">
+                  <p className="text-gray-300 text-sm font-medium line-clamp-2 mb-2">
                     {getResumen(orden)}
                   </p>
+
+                  {/* Domicilio badge + address */}
+                  {orden.tipo_servicio === 'domicilio' && (
+                    <div className="mb-3 flex flex-col gap-1.5">
+                      <div>
+                        <span
+                          className="text-xs font-bold px-2 py-0.5 rounded-full"
+                          style={{ background: 'rgba(41,128,185,0.15)', color: '#5DADE2' }}
+                        >
+                          🛵 Pedido a domicilio
+                        </span>
+                      </div>
+                      {orden.direccion_entrega && (
+                        <p className="text-xs font-medium pl-0.5" style={{ color: '#9CA3AF' }}>
+                          📍 {orden.direccion_entrega}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Footer: date + total + modify button */}
                   <div
@@ -494,6 +517,28 @@ export default function MisPedidosPage() {
                     <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
 
                     <div className="flex items-center gap-2">
+                      {/* Ver en mapa — only for domicilio orders in-progress or ready */}
+                      {orden.tipo_servicio === 'domicilio' &&
+                        (orden.estado === 'lista' || orden.estado === 'en_preparacion') &&
+                        (orden.latitud_entrega || orden.direccion_entrega) && (
+                          <button
+                            onClick={() => {
+                              const url =
+                                orden.latitud_entrega && orden.longitud_entrega
+                                  ? `https://maps.google.com/?q=${orden.latitud_entrega},${orden.longitud_entrega}`
+                                  : `https://maps.google.com/?q=${encodeURIComponent(orden.direccion_entrega ?? '')}`
+                              window.open(url, '_blank')
+                            }}
+                            className="px-3 py-1.5 rounded-xl text-xs font-extrabold transition active:scale-95 hover:opacity-90"
+                            style={{
+                              background: 'rgba(41,128,185,0.15)',
+                              border: '1px solid rgba(41,128,185,0.35)',
+                              color: '#5DADE2',
+                            }}
+                          >
+                            🗺️ Ver en mapa
+                          </button>
+                        )}
                       {esPendiente && (
                         <button
                           onClick={() => openModal(orden)}
