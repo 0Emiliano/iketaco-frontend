@@ -7,16 +7,15 @@ import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
 import type { TipoServicio, OrdenRequest } from '@/types'
 
-// ─── Service-type option card ─────────────────────────────────────────────────
-function TipoServicioCard({
-  value,
+// ─── Selector card (shared for tipo-servicio and metodo-pago) ────────────────
+
+function SelectorCard({
   selected,
   icon,
   label,
   description,
   onClick,
 }: {
-  value: TipoServicio
   selected: boolean
   icon: string
   label: string
@@ -34,10 +33,7 @@ function TipoServicioCard({
       }}
     >
       <span className="text-2xl">{icon}</span>
-      <span
-        className="text-sm font-extrabold"
-        style={{ color: selected ? '#F28500' : '#E5E7EB' }}
-      >
+      <span className="text-sm font-extrabold" style={{ color: selected ? '#F28500' : '#E5E7EB' }}>
         {label}
       </span>
       <span className="text-xs font-medium" style={{ color: selected ? '#F2A040' : '#6B7280' }}>
@@ -48,79 +44,57 @@ function TipoServicioCard({
 }
 
 // ─── Field ────────────────────────────────────────────────────────────────────
+
 function Field({
-  id,
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = 'text',
-  maxLength,
-  error,
+  id, label, value, onChange, placeholder, type = 'text', maxLength, error,
 }: {
-  id: string
-  label: string
-  value: string
-  onChange: (v: string) => void
-  placeholder: string
-  type?: string
-  maxLength?: number
-  error?: string
+  id: string; label: string; value: string; onChange: (v: string) => void
+  placeholder: string; type?: string; maxLength?: number; error?: string
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={id} className="text-xs font-semibold text-slate-300">
-        {label}
-      </label>
+      <label htmlFor={id} className="text-xs font-semibold text-slate-300">{label}</label>
       <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        maxLength={maxLength}
+        id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder} maxLength={maxLength}
         className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition"
-        style={{
-          borderColor: error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)',
-        }}
-        onFocus={(e) => (e.currentTarget.style.borderColor = '#F28500')}
-        onBlur={(e) =>
-          (e.currentTarget.style.borderColor = error
-            ? 'rgba(239,68,68,0.6)'
-            : 'rgba(255,255,255,0.15)')
-        }
+        style={{ borderColor: error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)' }}
+        onFocus={(e)  => (e.currentTarget.style.borderColor = '#F28500')}
+        onBlur={(e)   => (e.currentTarget.style.borderColor = error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)')}
       />
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   )
 }
 
+// ─── Payment method type ──────────────────────────────────────────────────────
+
+type MetodoPago = 'efectivo' | 'transferencia'
+
 // ─── Main component ───────────────────────────────────────────────────────────
+
 export default function OrderSummary() {
   const { state, subtotal, total, clearCart } = useCart()
   const router = useRouter()
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [loading,  setLoading]  = useState(false)
+  const [error,    setError]    = useState('')
   const [sinLogin, setSinLogin] = useState(false)
 
-  // Service type
-  const [tipoServicio, setTipoServicio] = useState<TipoServicio>('mostrador')
-
-  // Delivery fields
-  const [direccion, setDireccion] = useState('')
-  const [telefono, setTelefono] = useState('')
-
-  // Field-level errors
+  // Tipo de servicio
+  const [tipoServicio,   setTipoServicio]   = useState<TipoServicio>('mostrador')
+  const [direccion,      setDireccion]      = useState('')
+  const [telefono,       setTelefono]       = useState('')
   const [errorDireccion, setErrorDireccion] = useState('')
-  const [errorTelefono, setErrorTelefono] = useState('')
-
+  const [errorTelefono,  setErrorTelefono]  = useState('')
   const esDomicilio = tipoServicio === 'domicilio'
+
+  // Método de pago
+  const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
 
   // Pre-check login on mount
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (!token) setSinLogin(true)
+    if (!localStorage.getItem('accessToken')) setSinLogin(true)
   }, [])
 
   // Reset delivery errors when switching service type
@@ -151,49 +125,57 @@ export default function OrderSummary() {
   const handleOrder = async () => {
     setError('')
     const token = localStorage.getItem('accessToken')
-    if (!token) {
-      setSinLogin(true)
-      return
-    }
+    if (!token) { setSinLogin(true); return }
     setSinLogin(false)
-
     if (!validateDelivery()) return
 
     setLoading(true)
     try {
+      // Build order body
       const productos = state.items
         .filter((i) => i.tipo === 'producto')
-        .map((i) => ({
-          productoId: i.tipo === 'producto' ? i.producto.id : 0,
-          cantidad: i.quantity,
-        }))
-
+        .map((i) => ({ productoId: i.tipo === 'producto' ? i.producto.id : 0, cantidad: i.quantity }))
       const combos = state.items
         .filter((i) => i.tipo === 'combo')
-        .map((i) => ({
-          comboId: i.tipo === 'combo' ? i.combo.id : 0,
-          cantidad: i.quantity,
-        }))
+        .map((i) => ({ comboId: i.tipo === 'combo' ? i.combo.id : 0, cantidad: i.quantity }))
 
       const body: OrdenRequest = {
-        tipoServicio,
-        productos,
-        combos,
+        tipoServicio, productos, combos,
         ...(esDomicilio && {
           direccionEntrega: direccion.trim(),
-          telefonoCliente: telefono.trim(),
+          telefonoCliente:  telefono.trim(),
         }),
       }
 
-      const response = await apiClient.post('/orders', body, {
+      // 1. Create order
+      const ordenRes = await apiClient.post('/orders', body, {
         headers: { Authorization: `Bearer ${token}` },
       })
+      const orden = ordenRes.data
 
-      const orden = response.data
+      // 2a. Efectivo → confirmacion (cajero handles payment)
+      if (metodoPago === 'efectivo') {
+        clearCart()
+        router.push(`/confirmacion?orden=${orden.numero}&total=${orden.total}`)
+        return
+      }
+
+      // 2b. Transferencia → create payment record → upload page
+      const pagoRes = await apiClient.post('/payments', {
+        ordenId:      orden.id,
+        metodoPagoId: 3,           // Transferencia Bancaria
+        monto:        parseFloat(orden.total),
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const pago = pagoRes.data?.pago ?? pagoRes.data
+
       clearCart()
-      router.push(`/confirmacion?orden=${orden.numero}&total=${orden.total}`)
+      router.push(
+        `/transferencia?ordenId=${orden.id}&total=${orden.total}&pagoId=${pago.id}`
+      )
     } catch (err: any) {
-      const mensaje = err?.response?.data?.error
+      const mensaje = err?.response?.data?.error ?? err?.response?.data?.message
       if (err?.response?.status === 401) {
         router.push('/login')
       } else {
@@ -204,8 +186,18 @@ export default function OrderSummary() {
     }
   }
 
+  // ── Labels for the submit button ──
+  const btnLabel = () => {
+    if (loading) return 'Enviando pedido…'
+    const prefix = esDomicilio ? '🛵 Pedir a domicilio' : '🏪 Realizar Pedido'
+    const suffix = `$${total.toFixed(2)}`
+    if (metodoPago === 'transferencia') return `📱 Pagar por transferencia — ${suffix}`
+    return `${prefix} — ${suffix}`
+  }
+
   return (
     <div className="mt-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+
       {/* ── Resumen de totales ── */}
       <div
         className="rounded-2xl p-4 mb-4"
@@ -214,7 +206,6 @@ export default function OrderSummary() {
         <h2 className="text-white font-display mb-4" style={{ fontSize: '1.4rem' }}>
           Resumen del Pedido
         </h2>
-
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="text-gray-400 text-sm font-semibold">Subtotal</span>
@@ -237,51 +228,69 @@ export default function OrderSummary() {
       >
         <h3 className="text-white font-extrabold text-sm mb-3">Tipo de servicio</h3>
         <div className="flex gap-2">
-          <TipoServicioCard
-            value="mostrador"
-            selected={tipoServicio === 'mostrador'}
-            icon="🏪"
-            label="Mostrador"
-            description="Recoge en caja"
+          <SelectorCard
+            selected={tipoServicio === 'mostrador'} icon="🏪"
+            label="Mostrador" description="Recoge en caja"
             onClick={() => setTipoServicio('mostrador')}
           />
-          <TipoServicioCard
-            value="domicilio"
-            selected={tipoServicio === 'domicilio'}
-            icon="🛵"
-            label="Domicilio"
-            description="Envío a domicilio"
+          <SelectorCard
+            selected={tipoServicio === 'domicilio'} icon="🛵"
+            label="Domicilio" description="Envío a domicilio"
             onClick={() => setTipoServicio('domicilio')}
           />
         </div>
 
-        {/* ── Campos de entrega (sólo domicilio) ── */}
+        {/* Delivery fields */}
         {esDomicilio && (
-          <div
-            className="mt-4 flex flex-col gap-3"
-            style={{
-              animation: 'fadeSlideDown 0.2s ease both',
-            }}
-          >
+          <div className="mt-4 flex flex-col gap-3" style={{ animation: 'fadeSlideDown 0.2s ease both' }}>
             <Field
-              id="direccion"
-              label="Dirección de entrega *"
-              value={direccion}
-              onChange={setDireccion}
-              placeholder="Calle, número, colonia…"
-              maxLength={300}
+              id="direccion" label="Dirección de entrega *"
+              value={direccion} onChange={setDireccion}
+              placeholder="Calle, número, colonia…" maxLength={300}
               error={errorDireccion}
             />
             <Field
-              id="telefono"
-              label="Teléfono de contacto *"
-              value={telefono}
-              onChange={setTelefono}
-              placeholder="Ej. 6621234567"
-              type="tel"
-              maxLength={20}
+              id="telefono" label="Teléfono de contacto *"
+              value={telefono} onChange={setTelefono}
+              placeholder="Ej. 6621234567" type="tel" maxLength={20}
               error={errorTelefono}
             />
+          </div>
+        )}
+      </div>
+
+      {/* ── Método de pago ── */}
+      <div
+        className="rounded-2xl p-4 mb-4"
+        style={{ background: '#151515', border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        <h3 className="text-white font-extrabold text-sm mb-3">Método de pago</h3>
+        <div className="flex gap-2">
+          <SelectorCard
+            selected={metodoPago === 'efectivo'} icon="💵"
+            label="Efectivo" description="Paga en caja"
+            onClick={() => setMetodoPago('efectivo')}
+          />
+          <SelectorCard
+            selected={metodoPago === 'transferencia'} icon="📱"
+            label="Transferencia" description="SPEI / QR"
+            onClick={() => setMetodoPago('transferencia')}
+          />
+        </div>
+
+        {/* Transfer info hint */}
+        {metodoPago === 'transferencia' && (
+          <div
+            className="mt-3 rounded-xl px-3 py-2.5"
+            style={{
+              background: 'rgba(242,133,0,0.07)',
+              border: '1px solid rgba(242,133,0,0.2)',
+              animation: 'fadeSlideDown 0.2s ease both',
+            }}
+          >
+            <p className="text-xs text-orange-300 font-semibold">
+              📋 Te mostraremos los datos bancarios para que realices la transferencia y subas tu comprobante.
+            </p>
           </div>
         )}
       </div>
@@ -289,7 +298,7 @@ export default function OrderSummary() {
       {/* ── Error global ── */}
       {error && <p className="text-red-400 text-sm font-semibold text-center mb-4">{error}</p>}
 
-      {/* ── Link agregar más ── */}
+      {/* ── Agregar más ── */}
       <div className="text-center mb-5">
         <Link
           href="/menu"
@@ -334,14 +343,16 @@ export default function OrderSummary() {
         disabled={loading}
         className="w-full py-5 rounded-2xl text-white font-extrabold text-lg transition-all active:scale-95 hover:opacity-90 disabled:opacity-50"
         style={{
-          background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
-          boxShadow: '0 6px 20px rgba(242,133,0,0.45)',
+          background: metodoPago === 'transferencia'
+            ? 'linear-gradient(135deg, #2980B9 0%, #1A5276 100%)'
+            : 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
+          boxShadow: metodoPago === 'transferencia'
+            ? '0 6px 20px rgba(41,128,185,0.4)'
+            : '0 6px 20px rgba(242,133,0,0.45)',
           letterSpacing: '0.01em',
         }}
       >
-        {loading
-          ? 'Enviando pedido...'
-          : `${esDomicilio ? '🛵 Pedir a domicilio' : '🏪 Realizar Pedido'} — $${total.toFixed(2)}`}
+        {btnLabel()}
       </button>
 
       <style>{`
