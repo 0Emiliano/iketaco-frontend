@@ -94,18 +94,33 @@ export default function OrderSummary() {
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
 
   // ── Google Places Autocomplete ──────────────────────────────────────────────
+  // initOnMount: false because the Maps script loads async (afterInteractive).
+  // We call init() manually once window.google.maps.places is available.
   const {
     ready,
     value: addressValue,
     setValue: setAddressValue,
     suggestions: { status: suggestStatus, data: suggestions },
     clearSuggestions,
+    init: initPlaces,
   } = usePlacesAutocomplete({
     requestOptions: { componentRestrictions: { country: 'mx' } },
     debounce: 300,
-    // Don't init until the component mounts (window.google must be available)
-    initOnMount: typeof window !== 'undefined' && typeof window.google !== 'undefined',
+    initOnMount: false,
   })
+
+  // Poll until the Maps API script is loaded, then init the Places hook
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const tryInit = () => {
+      if ((window as any).google?.maps?.places) { initPlaces(); return true }
+      return false
+    }
+    if (!tryInit()) {
+      const id = setInterval(() => { if (tryInit()) clearInterval(id) }, 150)
+      return () => clearInterval(id)
+    }
+  }, [initPlaces])
 
   const handleSelectAddress = async (description: string) => {
     setAddressValue(description, false) // false = don't re-fetch suggestions
