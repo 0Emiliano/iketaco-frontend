@@ -1,11 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
-import usePlacesAutocomplete, { getGeocode, getLatLng } from 'use-places-autocomplete'
 import type { TipoServicio, OrdenRequest } from '@/types'
 
 // ─── Selector card (shared for tipo-servicio and metodo-pago) ────────────────
@@ -72,6 +71,74 @@ function Field({
 
 type MetodoPago = 'efectivo' | 'transferencia'
 
+// ─── Google Places Autocomplete (new API — AutocompleteSuggestion) ────────────
+
+interface PlaceSuggestion {
+  placeId: string
+  text: string
+}
+
+interface SelectedPlace {
+  address: string
+  lat: number | null
+  lng: number | null
+}
+
+function usePlaces(query: string, enabled: boolean) {
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
+  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null)
+
+  useEffect(() => {
+    if (!enabled || query.trim().length < 3) { setSuggestions([]); return }
+
+    const ctrl = new AbortController()
+    const timer = setTimeout(async () => {
+      try {
+        const g = (window as any).google?.maps?.places
+        if (!g?.AutocompleteSuggestion) return
+        if (!sessionTokenRef.current) {
+          sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken()
+        }
+        const { suggestions: raw } =
+          await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+            input: query,
+            sessionToken: sessionTokenRef.current,
+            includedRegionCodes: ['mx'],
+          })
+        if (ctrl.signal.aborted) return
+        setSuggestions(
+          raw.map((s) => ({
+            placeId: s.placePrediction!.placeId,
+            text:    s.placePrediction!.text.text,
+          }))
+        )
+      } catch { if (!ctrl.signal.aborted) setSuggestions([]) }
+    }, 300)
+
+    return () => { clearTimeout(timer); ctrl.abort() }
+  }, [query, enabled])
+
+  const selectPlace = async (suggestion: PlaceSuggestion): Promise<SelectedPlace> => {
+    sessionTokenRef.current = null // reset session after selection
+    setSuggestions([])
+    try {
+      const place = new google.maps.places.Place({ id: suggestion.placeId })
+      await place.fetchFields({ fields: ['formattedAddress', 'location'] })
+      return {
+        address: place.formattedAddress ?? suggestion.text,
+        lat:     place.location?.lat() ?? null,
+        lng:     place.location?.lng() ?? null,
+      }
+    } catch {
+      return { address: suggestion.text, lat: null, lng: null }
+    }
+  }
+
+  const clear = () => setSuggestions([])
+
+  return { suggestions, selectPlace, clear }
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function OrderSummary() {
@@ -87,50 +154,35 @@ export default function OrderSummary() {
   const [telefono,       setTelefono]       = useState('')
   const [errorDireccion, setErrorDireccion] = useState('')
   const [errorTelefono,  setErrorTelefono]  = useState('')
+  const [addressValue,   setAddressValue]   = useState('')
   const [coordEntrega,   setCoordEntrega]   = useState<{ lat: number; lng: number } | null>(null)
+  const [mapsReady,      setMapsReady]      = useState(false)
   const esDomicilio = tipoServicio === 'domicilio'
 
   // Método de pago
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
 
-  // ── Google Places Autocomplete ──────────────────────────────────────────────
-  // initOnMount: false because the Maps script loads async (afterInteractive).
-  // We call init() manually once window.google.maps.places is available.
-  const {
-    ready,
-    value: addressValue,
-    setValue: setAddressValue,
-    suggestions: { status: suggestStatus, data: suggestions },
-    clearSuggestions,
-    init: initPlaces,
-  } = usePlacesAutocomplete({
-    requestOptions: { componentRestrictions: { country: 'mx' } },
-    debounce: 300,
-    initOnMount: false,
-  })
+  // ── Google Places Autocomplete (new AutocompleteSuggestion API) ─────────────
+  const { suggestions, selectPlace, clear: clearSuggestions } = usePlaces(
+    addressValue,
+    mapsReady && esDomicilio
+  )
 
-  // Poll until the Maps API script is loaded, then init the Places hook
+  // Poll until the Maps script (afterInteractive) exposes AutocompleteSuggestion
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const tryInit = () => {
-      if ((window as any).google?.maps?.places) { initPlaces(); return true }
-      return false
-    }
-    if (!tryInit()) {
-      const id = setInterval(() => { if (tryInit()) clearInterval(id) }, 150)
-      return () => clearInterval(id)
-    }
-  }, [initPlaces])
+    const check = () => !!(window as any).google?.maps?.places?.AutocompleteSuggestion
+    if (check()) { setMapsReady(true); return }
+    const id = setInterval(() => { if (check()) { setMapsReady(true); clearInterval(id) } }, 150)
+    return () => clearInterval(id)
+  }, [])
 
-  const handleSelectAddress = async (description: string) => {
-    setAddressValue(description, false) // false = don't re-fetch suggestions
-    clearSuggestions()
-    setCoordEntrega(null)
-    try {
-      const results = await getGeocode({ address: description })
-      const { lat, lng } = await getLatLng(results[0])
-      setCoordEntrega({ lat, lng })
-    } catch { /* coordinates are optional — delivery still works with text address */ }
+  const handleSelectAddress = async (suggestion: PlaceSuggestion) => {
+    const place = await selectPlace(suggestion)
+    setAddressValue(place.address)
+    if (place.lat !== null && place.lng !== null) {
+      setCoordEntrega({ lat: place.lat, lng: place.lng })
+    }
   }
 
   // Pre-check login on mount
@@ -142,9 +194,10 @@ export default function OrderSummary() {
   useEffect(() => {
     setErrorDireccion('')
     setErrorTelefono('')
-    setAddressValue('', false)
+    setAddressValue('')
     setCoordEntrega(null)
-  }, [tipoServicio, setAddressValue])
+    clearSuggestions()
+  }, [tipoServicio]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const validateDelivery = (): boolean => {
     let valid = true
@@ -302,10 +355,10 @@ export default function OrderSummary() {
                 value={addressValue}
                 onChange={(e) => {
                   setAddressValue(e.target.value)
-                  setCoordEntrega(null) // reset coords if user types manually
+                  setCoordEntrega(null) // reset coords when user types
                 }}
-                placeholder={ready ? 'Calle, número, colonia…' : 'Cargando…'}
-                disabled={!ready}
+                placeholder={mapsReady ? 'Calle, número, colonia…' : 'Cargando mapa…'}
+                disabled={!mapsReady}
                 autoComplete="off"
                 maxLength={300}
                 className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition disabled:opacity-50"
@@ -315,7 +368,7 @@ export default function OrderSummary() {
               />
 
               {/* Suggestions dropdown */}
-              {suggestStatus === 'OK' && suggestions.length > 0 && (
+              {suggestions.length > 0 && (
                 <ul
                   className="absolute left-0 right-0 z-50 rounded-2xl overflow-hidden"
                   style={{
@@ -325,11 +378,11 @@ export default function OrderSummary() {
                     boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                   }}
                 >
-                  {suggestions.map(({ place_id, description }) => (
+                  {suggestions.map((s) => (
                     <li
-                      key={place_id}
-                      onMouseDown={(e) => e.preventDefault()} // prevent blur before click
-                      onClick={() => handleSelectAddress(description)}
+                      key={s.placeId}
+                      onMouseDown={(e) => e.preventDefault()} // prevent input blur before click
+                      onClick={() => handleSelectAddress(s)}
                       className="flex items-start gap-2.5 px-4 py-3 cursor-pointer transition-colors"
                       style={{
                         color: '#E5E7EB',
@@ -339,7 +392,7 @@ export default function OrderSummary() {
                       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
                       <span className="mt-0.5 text-sm">📍</span>
-                      <span className="text-sm font-medium leading-snug">{description}</span>
+                      <span className="text-sm font-medium leading-snug">{s.text}</span>
                     </li>
                   ))}
                 </ul>

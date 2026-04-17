@@ -13,8 +13,7 @@
     "axios": "^1.7.9",
     "next": "^15.5.12",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "use-places-autocomplete": "^4.0.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
