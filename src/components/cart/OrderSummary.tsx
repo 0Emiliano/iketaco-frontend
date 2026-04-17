@@ -86,7 +86,7 @@ interface SelectedPlace {
 
 function usePlaces(query: string, enabled: boolean) {
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
-  const sessionTokenRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null)
+  const sessionTokenRef = useRef<any>(null)
 
   useEffect(() => {
     if (!enabled || query.trim().length < 3) { setSuggestions([]); return }
@@ -94,23 +94,30 @@ function usePlaces(query: string, enabled: boolean) {
     const ctrl = new AbortController()
     const timer = setTimeout(async () => {
       try {
-        const g = (window as any).google?.maps?.places
-        if (!g?.AutocompleteSuggestion) return
+        // importLibrary("places") loads the new Places API on demand.
+        // The legacy `&libraries=places` URL param only loads the old API
+        // (AutocompleteService) and does NOT expose AutocompleteSuggestion
+        // on the global namespace — that's why checking window.google.maps.places
+        // never worked. importLibrary is the correct entry point.
+        const { AutocompleteSuggestion, AutocompleteSessionToken } =
+          await (window as any).google.maps.importLibrary('places') as any
+
         if (!sessionTokenRef.current) {
-          sessionTokenRef.current = new google.maps.places.AutocompleteSessionToken()
+          sessionTokenRef.current = new AutocompleteSessionToken()
         }
-        const { suggestions: raw } =
-          await google.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-            input: query,
-            sessionToken: sessionTokenRef.current,
-            includedRegionCodes: ['mx'],
-          })
+        const { suggestions: raw } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input: query,
+          sessionToken: sessionTokenRef.current,
+          includedRegionCodes: ['mx'],
+        })
         if (ctrl.signal.aborted) return
         setSuggestions(
-          raw.map((s) => ({
-            placeId: s.placePrediction!.placeId,
-            text:    s.placePrediction!.text.text,
-          }))
+          (raw as any[])
+            .map((s) => ({
+              placeId: s.placePrediction?.placeId ?? '',
+              text:    s.placePrediction?.text?.text ?? '',
+            }))
+            .filter((s) => s.placeId)
         )
       } catch { if (!ctrl.signal.aborted) setSuggestions([]) }
     }, 300)
@@ -119,10 +126,11 @@ function usePlaces(query: string, enabled: boolean) {
   }, [query, enabled])
 
   const selectPlace = async (suggestion: PlaceSuggestion): Promise<SelectedPlace> => {
-    sessionTokenRef.current = null // reset session after selection
+    sessionTokenRef.current = null
     setSuggestions([])
     try {
-      const place = new google.maps.places.Place({ id: suggestion.placeId })
+      const { Place } = await (window as any).google.maps.importLibrary('places') as any
+      const place = new Place({ id: suggestion.placeId })
       await place.fetchFields({ fields: ['formattedAddress', 'location'] })
       return {
         address: place.formattedAddress ?? suggestion.text,
@@ -168,10 +176,22 @@ export default function OrderSummary() {
     mapsReady && esDomicilio
   )
 
-  // Poll until the Maps script (afterInteractive) exposes AutocompleteSuggestion
+  // Poll until the Maps bootstrap script exposes google.maps.importLibrary.
+  // NOTE: AutocompleteSuggestion is NOT on the global namespace with the legacy
+  // &libraries=places param — it only exists after importLibrary("places").
+  // Polling for importLibrary (available as soon as the bootstrap loads) is correct.
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const check = () => !!(window as any).google?.maps?.places?.AutocompleteSuggestion
+    const check = () => {
+      const w = window as any
+      console.log('[Maps Debug] google:', !!w.google)
+      console.log('[Maps Debug] google.maps:', !!w.google?.maps)
+      console.log('[Maps Debug] importLibrary:', !!w.google?.maps?.importLibrary)
+      // AutocompleteSuggestion is NOT here with legacy loader — that was the bug:
+      console.log('[Maps Debug] places (legacy):', !!w.google?.maps?.places)
+      console.log('[Maps Debug] AutocompleteSuggestion (legacy):', !!w.google?.maps?.places?.AutocompleteSuggestion)
+      return !!w.google?.maps?.importLibrary
+    }
     if (check()) { setMapsReady(true); return }
     const id = setInterval(() => { if (check()) { setMapsReady(true); clearInterval(id) } }, 150)
     return () => clearInterval(id)

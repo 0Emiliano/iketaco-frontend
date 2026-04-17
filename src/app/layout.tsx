@@ -39,12 +39,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className={`${bebasNeue.variable} ${nunito.variable}`}>
-      <head>
-        <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`}
-          strategy="beforeInteractive"
-        />
-      </head>
+      <head />
       <body>
         <CartProvider>
           <div className="min-h-screen bg-[#0A0A0A] font-body">
@@ -53,6 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster />
           </div>
         </CartProvider>
+        <Script
+          id="google-maps"
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async`}
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )
