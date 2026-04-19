@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
@@ -70,83 +70,7 @@ function Field({
 // ─── Payment method type ──────────────────────────────────────────────────────
 
 type MetodoPago = 'efectivo' | 'transferencia'
-
-// ─── Google Places Autocomplete (legacy AutocompleteService) ─────────────────
-
-interface PlaceSuggestion {
-  placeId: string
-  text: string
-}
-
-interface SelectedPlace {
-  address: string
-  lat: number | null
-  lng: number | null
-}
-
-function usePlaces(query: string, enabled: boolean) {
-  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
-  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
-  const placesService = useRef<google.maps.places.PlacesService | null>(null)
-  const divRef = useRef<HTMLDivElement>(document.createElement('div'))
-
-  const getServices = () => {
-    if (!autocompleteService.current && (window as any).google?.maps?.places) {
-      autocompleteService.current = new google.maps.places.AutocompleteService()
-      placesService.current = new google.maps.places.PlacesService(divRef.current)
-    }
-    return { ac: autocompleteService.current, ps: placesService.current }
-  }
-
-  useEffect(() => {
-    if (!enabled || query.trim().length < 3) { setSuggestions([]); return }
-
-    const timer = setTimeout(() => {
-      const { ac } = getServices()
-      if (!ac) return
-
-      ac.getPlacePredictions(
-        { input: query, componentRestrictions: { country: 'mx' }, language: 'es' },
-        (predictions, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSuggestions(predictions.map((p) => ({ placeId: p.place_id, text: p.description })))
-          } else {
-            setSuggestions([])
-          }
-        }
-      )
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [query, enabled])
-
-  const selectPlace = (suggestion: PlaceSuggestion): Promise<SelectedPlace> => {
-    setSuggestions([])
-    return new Promise((resolve) => {
-      const { ps } = getServices()
-      if (!ps) { resolve({ address: suggestion.text, lat: null, lng: null }); return }
-
-      ps.getDetails(
-        { placeId: suggestion.placeId, fields: ['formatted_address', 'geometry'] },
-        (place, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
-            resolve({
-              address: place.formatted_address ?? suggestion.text,
-              lat:     place.geometry.location.lat(),
-              lng:     place.geometry.location.lng(),
-            })
-          } else {
-            resolve({ address: suggestion.text, lat: null, lng: null })
-          }
-        }
-      )
-    })
-  }
-
-  const clear = () => setSuggestions([])
-
-  return { suggestions, selectPlace, clear }
-}
+type UbicacionEstado = 'idle' | 'loading' | 'success' | 'error'
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -159,40 +83,20 @@ export default function OrderSummary() {
   const [sinLogin, setSinLogin] = useState(false)
 
   // Tipo de servicio
-  const [tipoServicio,   setTipoServicio]   = useState<TipoServicio>('mostrador')
-  const [telefono,       setTelefono]       = useState('')
-  const [errorDireccion, setErrorDireccion] = useState('')
-  const [errorTelefono,  setErrorTelefono]  = useState('')
-  const [addressValue,   setAddressValue]   = useState('')
-  const [coordEntrega,   setCoordEntrega]   = useState<{ lat: number; lng: number } | null>(null)
-  const [mapsReady,      setMapsReady]      = useState(false)
+  const [tipoServicio, setTipoServicio] = useState<TipoServicio>('mostrador')
   const esDomicilio = tipoServicio === 'domicilio'
+
+  // Delivery fields
+  const [ubicacionEstado, setUbicacionEstado] = useState<UbicacionEstado>('idle')
+  const [coordEntrega,    setCoordEntrega]    = useState<{ lat: number; lng: number } | null>(null)
+  const [direccionTexto,  setDireccionTexto]  = useState('')   // referencias del cliente
+  const [telefono,        setTelefono]        = useState('')
+  const [errorUbicacion,  setErrorUbicacion]  = useState('')
+  const [errorDireccion,  setErrorDireccion]  = useState('')
+  const [errorTelefono,   setErrorTelefono]   = useState('')
 
   // Método de pago
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
-
-  // ── Google Places Autocomplete ───────────────────────────────────────────────
-  const { suggestions, selectPlace, clear: clearSuggestions } = usePlaces(
-    addressValue,
-    mapsReady && esDomicilio
-  )
-
-  // Poll until AutocompleteService is available (loaded with &libraries=places)
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const check = () => !!(window as any).google?.maps?.places?.AutocompleteService
-    if (check()) { setMapsReady(true); return }
-    const id = setInterval(() => { if (check()) { setMapsReady(true); clearInterval(id) } }, 150)
-    return () => clearInterval(id)
-  }, [])
-
-  const handleSelectAddress = async (suggestion: PlaceSuggestion) => {
-    const place = await selectPlace(suggestion)
-    setAddressValue(place.address)
-    if (place.lat !== null && place.lng !== null) {
-      setCoordEntrega({ lat: place.lat, lng: place.lng })
-    }
-  }
 
   // Pre-check login on mount
   useEffect(() => {
@@ -201,18 +105,57 @@ export default function OrderSummary() {
 
   // Reset delivery fields when switching service type
   useEffect(() => {
+    setUbicacionEstado('idle')
+    setCoordEntrega(null)
+    setDireccionTexto('')
+    setErrorUbicacion('')
     setErrorDireccion('')
     setErrorTelefono('')
-    setAddressValue('')
-    setCoordEntrega(null)
-    clearSuggestions()
-  }, [tipoServicio]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tipoServicio])
+
+  // ── Geolocation ──────────────────────────────────────────────────────────────
+
+  const obtenerUbicacion = () => {
+    if (!navigator.geolocation) {
+      setErrorUbicacion('Tu navegador no soporta geolocalización')
+      setUbicacionEstado('error')
+      return
+    }
+    setUbicacionEstado('loading')
+    setErrorUbicacion('')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoordEntrega({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+        setUbicacionEstado('success')
+      },
+      (err) => {
+        setUbicacionEstado('error')
+        setErrorUbicacion(
+          err.code === err.PERMISSION_DENIED
+            ? 'Permiso de ubicación denegado. Actívalo en tu navegador.'
+            : 'No se pudo obtener tu ubicación. Intenta de nuevo.'
+        )
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
+
+  // ── Validation ───────────────────────────────────────────────────────────────
 
   const validateDelivery = (): boolean => {
     let valid = true
     if (esDomicilio) {
-      if (addressValue.trim().length < 5) {
-        setErrorDireccion('La dirección debe tener al menos 5 caracteres.')
+      if (!coordEntrega) {
+        setErrorUbicacion('Comparte tu ubicación para continuar')
+        setUbicacionEstado('error')
+        valid = false
+      }
+      if (direccionTexto.trim().length < 10) {
+        setErrorDireccion('Agrega referencias de entrega (mínimo 10 caracteres).')
         valid = false
       } else {
         setErrorDireccion('')
@@ -227,6 +170,8 @@ export default function OrderSummary() {
     return valid
   }
 
+  // ── Order submission ─────────────────────────────────────────────────────────
+
   const handleOrder = async () => {
     setError('')
     const token = localStorage.getItem('accessToken')
@@ -236,7 +181,6 @@ export default function OrderSummary() {
 
     setLoading(true)
     try {
-      // Build order body
       const productos = state.items
         .filter((i) => i.tipo === 'producto')
         .map((i) => ({ productoId: i.tipo === 'producto' ? i.producto.id : 0, cantidad: i.quantity }))
@@ -247,7 +191,7 @@ export default function OrderSummary() {
       const body: OrdenRequest = {
         tipoServicio, productos, combos,
         ...(esDomicilio && {
-          direccionEntrega: addressValue.trim(),
+          direccionEntrega: direccionTexto.trim(),
           telefonoCliente:  telefono.trim(),
           ...(coordEntrega && {
             latitudEntrega:  coordEntrega.lat,
@@ -272,7 +216,7 @@ export default function OrderSummary() {
       // 2b. Transferencia → create payment record → upload page
       const pagoRes = await apiClient.post('/payments', {
         ordenId:      orden.id,
-        metodoPagoId: 3,           // Transferencia Bancaria
+        metodoPagoId: 3,
         monto:        parseFloat(orden.total),
       }, {
         headers: { Authorization: `Bearer ${token}` },
@@ -280,9 +224,7 @@ export default function OrderSummary() {
       const pago = pagoRes.data?.pago ?? pagoRes.data
 
       clearCart()
-      router.push(
-        `/transferencia?ordenId=${orden.id}&total=${orden.total}&pagoId=${pago.id}`
-      )
+      router.push(`/transferencia?ordenId=${orden.id}&total=${orden.total}&pagoId=${pago.id}`)
     } catch (err: any) {
       const mensaje = err?.response?.data?.error ?? err?.response?.data?.message
       if (err?.response?.status === 401) {
@@ -295,7 +237,7 @@ export default function OrderSummary() {
     }
   }
 
-  // ── Labels for the submit button ──
+  // ── Submit button label ──
   const btnLabel = () => {
     if (loading) return 'Enviando pedido…'
     const prefix = esDomicilio ? '🛵 Pedir a domicilio' : '🏪 Realizar Pedido'
@@ -349,74 +291,92 @@ export default function OrderSummary() {
           />
         </div>
 
-        {/* Delivery fields */}
+        {/* ── Delivery fields ── */}
         {esDomicilio && (
           <div className="mt-4 flex flex-col gap-3" style={{ animation: 'fadeSlideDown 0.2s ease both' }}>
 
-            {/* Address autocomplete */}
-            <div className="flex flex-col gap-1 relative">
-              <label htmlFor="direccion" className="text-xs font-semibold text-slate-300">
-                Dirección de entrega *
-              </label>
-              <input
-                id="direccion"
-                type="text"
-                value={addressValue}
-                onChange={(e) => {
-                  setAddressValue(e.target.value)
-                  setCoordEntrega(null) // reset coords when user types
-                }}
-                placeholder={mapsReady ? 'Calle, número, colonia…' : 'Cargando mapa…'}
-                disabled={!mapsReady}
-                autoComplete="off"
-                maxLength={300}
-                className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition disabled:opacity-50"
-                style={{ borderColor: errorDireccion ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)' }}
-                onFocus={(e) => (e.currentTarget.style.borderColor = '#F28500')}
-                onBlur={(e) => (e.currentTarget.style.borderColor = errorDireccion ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)')}
-              />
+            {/* 1. Location button / status card */}
+            {ubicacionEstado === 'idle' && (
+              <button
+                type="button"
+                onClick={obtenerUbicacion}
+                className="w-full py-3 rounded-2xl font-extrabold text-white text-sm flex items-center justify-center gap-2 transition-all active:scale-95 hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)', boxShadow: '0 4px 14px rgba(242,133,0,0.35)' }}
+              >
+                <span>📍</span> Compartir mi ubicación
+              </button>
+            )}
 
-              {/* Suggestions dropdown */}
-              {suggestions.length > 0 && (
-                <ul
-                  className="absolute left-0 right-0 z-50 rounded-2xl overflow-hidden"
-                  style={{
-                    top: 'calc(100% + 4px)',
-                    background: '#2A2A2A',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
-                  }}
-                >
-                  {suggestions.map((s) => (
-                    <li
-                      key={s.placeId}
-                      onMouseDown={(e) => e.preventDefault()} // prevent input blur before click
-                      onClick={() => handleSelectAddress(s)}
-                      className="flex items-start gap-2.5 px-4 py-3 cursor-pointer transition-colors"
-                      style={{
-                        color: '#E5E7EB',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(242,133,0,0.1)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                    >
-                      <span className="mt-0.5 text-sm">📍</span>
-                      <span className="text-sm font-medium leading-snug">{s.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
+            {ubicacionEstado === 'loading' && (
+              <button
+                type="button"
+                disabled
+                className="w-full py-3 rounded-2xl font-extrabold text-white text-sm flex items-center justify-center gap-2 opacity-70 cursor-not-allowed"
+                style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+              >
+                <span
+                  className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                  style={{ borderColor: 'rgba(255,255,255,0.5)', borderTopColor: 'transparent' }}
+                />
+                Obteniendo ubicación...
+              </button>
+            )}
 
-              {errorDireccion && (
-                <p className="text-xs text-red-400 font-medium">{errorDireccion}</p>
-              )}
-              {coordEntrega && !errorDireccion && (
-                <p className="text-xs font-semibold" style={{ color: '#27AE60' }}>
-                  ✓ Ubicación confirmada en el mapa
+            {ubicacionEstado === 'success' && (
+              <div
+                className="rounded-2xl px-4 py-3"
+                style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.3)' }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-extrabold" style={{ color: '#27AE60' }}>✓ Ubicación obtenida</p>
+                    <p className="text-xs font-medium mt-0.5" style={{ color: '#6FCF97' }}>
+                      Tu ubicación GPS fue registrada correctamente
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={obtenerUbicacion}
+                    className="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
+                    style={{ background: 'rgba(39,174,96,0.15)', color: '#27AE60', border: '1px solid rgba(39,174,96,0.3)' }}
+                  >
+                    Actualizar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {ubicacionEstado === 'error' && (
+              <div
+                className="rounded-2xl px-4 py-3"
+                style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
+              >
+                <p className="text-sm font-bold mb-2" style={{ color: '#E74C3C' }}>
+                  {errorUbicacion || 'No se pudo obtener la ubicación'}
                 </p>
-              )}
-            </div>
+                <button
+                  type="button"
+                  onClick={obtenerUbicacion}
+                  className="text-xs font-extrabold px-3 py-1.5 rounded-xl transition active:scale-95"
+                  style={{ background: 'rgba(231,76,60,0.15)', color: '#E74C3C', border: '1px solid rgba(231,76,60,0.3)' }}
+                >
+                  Intentar de nuevo
+                </button>
+              </div>
+            )}
 
+            {/* 2. Referencias de entrega */}
+            <Field
+              id="referencias"
+              label="Referencias de entrega *"
+              value={direccionTexto}
+              onChange={(v) => { setDireccionTexto(v); setErrorDireccion('') }}
+              placeholder="Ej: Casa azul, portón negro, entre calle Obregón y Juárez"
+              maxLength={300}
+              error={errorDireccion}
+            />
+
+            {/* 3. Teléfono */}
             <Field
               id="telefono" label="Teléfono de contacto *"
               value={telefono} onChange={setTelefono}
@@ -446,7 +406,6 @@ export default function OrderSummary() {
           />
         </div>
 
-        {/* Transfer info hint */}
         {metodoPago === 'transferencia' && (
           <div
             className="mt-3 rounded-xl px-3 py-2.5"

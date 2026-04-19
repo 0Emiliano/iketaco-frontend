@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Bebas_Neue, Nunito } from 'next/font/google'
-import Script from 'next/script'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
 import BottomNav from '@/components/ui/BottomNav'
@@ -48,11 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster />
           </div>
         </CartProvider>
-        <Script
-          id="google-maps"
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async`}
-          strategy="afterInteractive"
-        />
       </body>
     </html>
   )
