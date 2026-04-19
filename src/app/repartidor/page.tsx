@@ -275,7 +275,7 @@ export default function RepartidorPage() {
     if (!raw || !tk) { router.push('/login'); return }
     try {
       const u = JSON.parse(raw)
-      if (u.rol !== 'repartidor') { router.push('/login'); return }
+      if (u.rol !== 'repartidor' && u.rol !== 'gerente') { router.push('/login'); return }
       setUsuario(u)
       setToken(tk)
     } catch {
