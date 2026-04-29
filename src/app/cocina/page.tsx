@@ -75,7 +75,7 @@ function CountdownBadge({ remaining }: { remaining: number }) {
         animation: isOverdue || isUrgent ? 'pulseBadge 1s ease-in-out infinite' : undefined,
       }}
     >
-      <span style={{ fontSize: '0.7rem' }}>⏱</span>
+      <span style={{ fontSize: '0.7rem' }}></span>
       {isOverdue ? '¡Tiempo!' : label}
     </span>
   )
@@ -137,7 +137,7 @@ function TimerSection({
       style={{ background: 'rgba(242,133,0,0.06)', border: '1px solid rgba(242,133,0,0.15)' }}
     >
       <p className="text-xs font-extrabold uppercase tracking-wider" style={{ color: '#F28500' }}>
-        ⏱ Tiempo estimado
+        Tiempo estimado
       </p>
 
       <div className="flex items-center gap-2">
@@ -173,7 +173,7 @@ function TimerSection({
         {/* Flash */}
         {flash && (
           <span className="text-xs font-bold text-emerald-400" style={{ animation: 'fadeOut 2s forwards' }}>
-            ✓ Guardado
+            Guardado
           </span>
         )}
       </div>
@@ -256,7 +256,7 @@ function ComandaCard({
               color: isEnPreparacion ? '#F28500' : '#9CA3AF',
             }}
           >
-            {isEnPreparacion ? '🔥 En preparación' : '⏳ Pendiente'}
+            {isEnPreparacion ? 'En preparación' : 'Pendiente'}
           </span>
           <span className="text-gray-500 text-xs">{tiempoTranscurrido(orden.creado_en)}</span>
         </div>
@@ -272,7 +272,7 @@ function ComandaCard({
             <div>
               <span className="text-white font-bold text-sm">{detalle.productos.nombre}</span>
               {detalle.notas_item && (
-                <p className="text-yellow-400 text-xs mt-0.5">⚠️ {detalle.notas_item}</p>
+                <p className="text-yellow-400 text-xs mt-0.5">{detalle.notas_item}</p>
               )}
             </div>
           </div>
@@ -298,7 +298,7 @@ function ComandaCard({
             className="text-yellow-400 text-xs mt-2 pt-2 font-bold"
             style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
           >
-            📝 {orden.notas_orden}
+            {orden.notas_orden}
           </p>
         )}
       </div>
@@ -328,7 +328,7 @@ function ComandaCard({
             className="flex-1 py-2.5 rounded-xl text-white font-extrabold text-sm transition-all active:scale-95"
             style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
           >
-            🔥 Iniciar preparación
+            Iniciar preparación
           </button>
         )}
         {orden.estado === 'en_preparacion' && (
@@ -337,7 +337,7 @@ function ComandaCard({
             className="flex-1 py-2.5 rounded-xl text-white font-extrabold text-sm transition-all active:scale-95"
             style={{ background: 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)' }}
           >
-            ✅ Marcar como lista
+            Marcar como lista
           </button>
         )}
         <button
@@ -346,7 +346,7 @@ function ComandaCard({
           style={{ background: 'rgba(255,255,255,0.06)' }}
           aria-label="Cancelar orden"
         >
-          ✕
+          X
         </button>
       </div>
     </div>
@@ -419,7 +419,6 @@ export default function CocinaPage() {
         style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🍳</span>
           <div>
             <h1 className="text-white font-extrabold text-lg leading-none">Sistema Cocina</h1>
             <p className="text-gray-400 text-xs mt-0.5">I KE TACOS BIRRIA</p>
@@ -451,8 +450,7 @@ export default function CocinaPage() {
         {/* ── Error state ── */}
         {error && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4" style={{ background: '#1A1A1A' }}>
-              😕
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: '#1A1A1A' }}>
             </div>
             <p className="text-white font-extrabold text-lg mb-1">Sin conexión</p>
             <p className="text-gray-400 text-sm mb-5">{error}</p>
@@ -469,8 +467,7 @@ export default function CocinaPage() {
         {/* ── Empty state ── */}
         {!error && ordenes.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <div className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-4" style={{ background: '#1A1A1A' }}>
-              ✅
+            <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4" style={{ background: '#1A1A1A' }}>
             </div>
             <h2 className="text-white font-extrabold text-xl mb-2">Sin comandas pendientes</h2>
             <p className="text-gray-400 text-sm">Las nuevas órdenes aparecerán aquí automáticamente</p>

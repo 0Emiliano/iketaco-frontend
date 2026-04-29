@@ -47,8 +47,6 @@ function MeseroProductCard({
       >
         {producto.imagen_url ? (
           <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
-        ) : (
-          <span>🌮</span>
         )}
       </div>
 
@@ -100,8 +98,6 @@ function MeseroComboCard({
       >
         {combo.imagen_url ? (
           <img src={combo.imagen_url} alt={combo.nombre} className="w-full h-full object-cover" />
-        ) : (
-          <span>🌮</span>
         )}
       </div>
 
@@ -397,7 +393,6 @@ export default function MeseroPage() {
       {/* Lista de items */}
       {items.length === 0 ? (
         <div className="flex flex-col items-center py-8 text-center gap-2">
-          <span className="text-3xl">🛒</span>
           <p className="text-gray-500 text-sm font-semibold">La orden está vacía</p>
           <p className="text-gray-600 text-xs">Toca el + en cualquier producto del menú</p>
         </div>
@@ -486,7 +481,7 @@ export default function MeseroPage() {
           className="w-full py-3 rounded-xl text-white font-extrabold text-sm uppercase tracking-wide transition active:scale-95 disabled:opacity-40"
           style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
         >
-          {enviando ? 'Enviando…' : '🍳 Enviar a cocina'}
+          {enviando ? 'Enviando…' : 'Enviar a cocina'}
         </button>
 
         {items.length > 0 && (
@@ -517,7 +512,6 @@ export default function MeseroPage() {
         style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-xl">🧑‍🍳</span>
           <div>
             <h1 className="text-white font-extrabold text-base leading-none">Tomar orden</h1>
             <p className="text-gray-500 text-xs mt-0.5">{usuario.email}</p>
@@ -590,7 +584,7 @@ export default function MeseroPage() {
           className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-white font-extrabold text-sm shadow-lg whitespace-nowrap"
           style={{ background: 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)' }}
         >
-          ✅ {toast}
+          {toast}
         </div>
       )}
     </div>

@@ -169,7 +169,7 @@ function TransferenciaContent() {
           style={{ background: 'rgba(242,133,0,0.07)', border: '1px solid rgba(242,133,0,0.18)' }}
         >
           <p className="text-xs text-orange-300 font-semibold leading-relaxed">
-            ⚠️ Transfiere exactamente <strong>{fmtTotal}</strong> y sube el comprobante
+            Transfiere exactamente <strong>{fmtTotal}</strong> y sube el comprobante
             para que el cajero confirme tu pago.
           </p>
         </div>
@@ -192,10 +192,9 @@ function TransferenciaContent() {
             style={{ animation: 'fadeIn 0.3s ease both' }}
           >
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+              className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(39,174,96,0.15)', border: '1px solid rgba(39,174,96,0.3)' }}
             >
-              ✅
             </div>
             <div>
               <p className="text-white font-extrabold text-lg">¡Comprobante enviado!</p>
@@ -238,7 +237,7 @@ function TransferenciaContent() {
                   background: 'rgba(242,133,0,0.04)',
                 }}
               >
-                <span className="text-3xl">📎</span>
+                <span className="text-3xl"></span>
                 <span className="text-sm font-extrabold text-white">Seleccionar imagen</span>
                 <span className="text-xs text-gray-500">JPG, PNG o WebP · máx. 5 MB</span>
               </button>
@@ -263,10 +262,9 @@ function TransferenciaContent() {
                 {/* File info + remove */}
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(242,133,0,0.12)' }}
                   >
-                    🖼
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold text-white truncate">{file.name}</p>
@@ -289,7 +287,7 @@ function TransferenciaContent() {
                   onClick={() => fileInputRef.current?.click()}
                   className="text-xs text-orange-300 hover:text-orange-100 font-semibold transition text-left"
                 >
-                  📎 Cambiar imagen
+                  Cambiar imagen
                 </button>
               </div>
             )}
@@ -311,7 +309,7 @@ function TransferenciaContent() {
                 style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}
               >
                 <p className="text-xs text-yellow-300 font-semibold">
-                  ⚠️ No se encontró el ID de pago. Regresa al carrito e intenta de nuevo.
+                  No se encontró el ID de pago. Regresa al carrito e intenta de nuevo.
                 </p>
               </div>
             )}

@@ -33,10 +33,9 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
         <div
-          className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4"
+          className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
           style={{ background: '#1A1A1A' }}
         >
-          🌮
         </div>
         <p className="text-white font-extrabold text-lg mb-1">Sin resultados</p>
         <p className="text-gray-400 text-sm font-medium">No hay combos disponibles</p>
@@ -70,8 +69,7 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
                   className="w-full h-full object-cover rounded-xl"
                 />
               ) : (
-                <span>🌮</span>
-              )}
+                    )}
             </div>
 
             {/* Info */}

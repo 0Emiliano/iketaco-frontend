@@ -65,18 +65,18 @@ function enviarARepartidor(orden: OrdenPendiente) {
 
   const mapsLine =
     lat !== null && lng !== null
-      ? `\n🗺️ Destino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+      ? `\nDestino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
       : ''
 
   const lineas: (string | null)[] = [
-    `🛵 *NUEVA ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
+    `*NUEVA ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
     '',
-    orden.nombre_cliente    ? `👤 ${orden.nombre_cliente}`    : null,
-    orden.telefono_cliente  ? `📞 ${orden.telefono_cliente}`  : null,
-    orden.direccion_entrega ? `📍 ${orden.direccion_entrega}` : null,
-    items ? `\n🛒 Pedido:\n${items}` : null,
+    orden.nombre_cliente    ? orden.nombre_cliente    : null,
+    orden.telefono_cliente  ? orden.telefono_cliente  : null,
+    orden.direccion_entrega ? orden.direccion_entrega : null,
+    items ? `\nPedido:\n${items}` : null,
     '',
-    `💰 Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
+    `Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
   ]
 
   const msg = lineas.filter((l) => l !== null).join('\n') + mapsLine
@@ -185,7 +185,7 @@ function TransferenciaCard({
           style={{ maxHeight: '180px' }}
         />
         <p className="text-center text-xs text-gray-500 py-1.5 font-semibold">
-          🔍 Toca para ver completo
+          Toca para ver completo
         </p>
       </a>
 
@@ -201,7 +201,7 @@ function TransferenciaCard({
           className="flex-1 py-2.5 rounded-xl text-sm font-extrabold transition-all active:scale-95 disabled:opacity-40"
           style={{ background: 'rgba(231,76,60,0.12)', color: '#F87171', border: '1px solid rgba(231,76,60,0.25)' }}
         >
-          {saving ? '…' : '✕ Rechazar'}
+          {saving ? '…' : 'Rechazar'}
         </button>
         <button
           onClick={() => confirmar(true)}
@@ -209,7 +209,7 @@ function TransferenciaCard({
           className="flex-1 py-2.5 rounded-xl text-white text-sm font-extrabold transition-all active:scale-95 disabled:opacity-40"
           style={{ background: 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)' }}
         >
-          {saving ? '…' : '✓ Aprobar'}
+          {saving ? '…' : 'Aprobar'}
         </button>
       </div>
     </div>
@@ -279,7 +279,7 @@ function OrdenCard({
               color: orden.estado === 'lista' ? '#27AE60' : '#2980B9',
             }}
           >
-            {orden.estado === 'lista' ? '✅ Lista' : '🛵 Entregada'}
+            {orden.estado === 'lista' ? 'Lista' : 'Entregada'}
           </span>
         </div>
         <div className="text-right flex-shrink-0">
@@ -318,7 +318,7 @@ function OrdenCard({
           style={{ background: 'rgba(41,128,185,0.1)', border: '1px solid rgba(41,128,185,0.25)' }}
         >
           <p className="text-xs text-blue-300 font-semibold">
-            📱 Pago por transferencia registrado. El cliente deberá subir su comprobante.
+            Pago por transferencia registrado. El cliente deberá subir su comprobante.
           </p>
         </div>
       ) : (
@@ -329,7 +329,7 @@ function OrdenCard({
             className="flex-1 py-2.5 rounded-xl text-white text-sm font-extrabold transition-all active:scale-95 disabled:opacity-40"
             style={{ background: 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)' }}
           >
-            {saving === 'efectivo' ? '…' : '💵 Efectivo'}
+            {saving === 'efectivo' ? '…' : 'Efectivo'}
           </button>
           <button
             onClick={() => pagar(3)}
@@ -341,7 +341,7 @@ function OrdenCard({
               border: '1px solid rgba(41,128,185,0.3)',
             }}
           >
-            {saving === 'transferencia' ? '…' : '📱 Transferencia'}
+            {saving === 'transferencia' ? '…' : 'Transferencia'}
           </button>
         </div>
       )}
@@ -469,7 +469,6 @@ export default function CajeroPage() {
         style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">💳</span>
           <div>
             <h1 className="text-white font-extrabold text-lg leading-none">Panel Cajero</h1>
             <p className="text-gray-400 text-xs mt-0.5">{usuario?.email}</p>
@@ -544,7 +543,6 @@ export default function CajeroPage() {
               className="rounded-2xl py-8 text-center"
               style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <p className="text-2xl mb-2">✓</p>
               <p className="text-gray-400 text-sm font-semibold">Sin transferencias pendientes</p>
             </div>
           ) : (
@@ -576,7 +574,6 @@ export default function CajeroPage() {
               className="rounded-2xl py-8 text-center"
               style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              <p className="text-2xl mb-2">🧾</p>
               <p className="text-gray-400 text-sm font-semibold">Sin órdenes pendientes de cobro</p>
             </div>
           ) : (

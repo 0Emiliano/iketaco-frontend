@@ -60,7 +60,6 @@ export default function PopularSection() {
                   className="w-full h-full object-cover rounded-xl"
                 />
               ) : (
-                <span>🌮</span>
               )}
             </div>
 

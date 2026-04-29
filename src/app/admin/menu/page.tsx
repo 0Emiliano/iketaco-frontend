@@ -276,7 +276,7 @@ export default function AdminMenuPage() {
         {/* Error de carga */}
         {fetchError && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-white font-extrabold text-lg mb-2">😕 {fetchError}</p>
+            <p className="text-white font-extrabold text-lg mb-2">{fetchError}</p>
             <button
               onClick={fetchData}
               className="px-6 py-3 rounded-2xl text-white font-extrabold text-sm mt-3 transition-all active:scale-95"
@@ -341,8 +341,7 @@ export default function AdminMenuPage() {
                           {producto.imagen_url ? (
                             <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
                           ) : (
-                            <span>🌮</span>
-                          )}
+                            )}
                         </div>
 
                         {/* Info */}
@@ -462,7 +461,7 @@ export default function AdminMenuPage() {
                       className="flex-1 py-2.5 rounded-xl text-sm font-extrabold text-center cursor-pointer transition-all active:scale-95"
                       style={{ background: 'rgba(255,255,255,0.08)', color: '#9CA3AF' }}
                     >
-                      {imagenFile ? `📎 ${imagenFile.name.slice(0, 18)}…` : 'Seleccionar imagen'}
+                      {imagenFile ? imagenFile.name.slice(0, 18) + '…' : 'Seleccionar imagen'}
                     </label>
 
                     {/* Botón subir */}

@@ -95,18 +95,18 @@ function compartirWhatsApp(orden: Entrega) {
 
   const mapsLine =
     lat !== null && lng !== null
-      ? `\n🗺️ Destino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+      ? `\nDestino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
       : ''
 
   const lineas: (string | null)[] = [
-    `🛵 *ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
+    `*ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
     '',
-    orden.nombre_cliente    ? `👤 ${orden.nombre_cliente}`    : null,
-    orden.telefono_cliente  ? `📞 ${orden.telefono_cliente}`  : null,
-    orden.direccion_entrega ? `📍 ${orden.direccion_entrega}` : null,
-    items ? `\n🛒 Pedido:\n${items}` : null,
+    orden.nombre_cliente    ? orden.nombre_cliente    : null,
+    orden.telefono_cliente  ? orden.telefono_cliente  : null,
+    orden.direccion_entrega ? orden.direccion_entrega : null,
+    items ? `\nPedido:\n${items}` : null,
     '',
-    `💰 Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
+    `Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
   ]
 
   const msg = lineas.filter((l) => l !== null).join('\n') + mapsLine
@@ -174,7 +174,7 @@ function EntregaCard({
               href={`tel:${entrega.telefono_cliente}`}
               className="text-xs text-orange-400 font-semibold mt-0.5 flex items-center gap-1 hover:text-orange-200 transition"
             >
-              📞 {entrega.telefono_cliente}
+              {entrega.telefono_cliente}
             </a>
           )}
         </div>
@@ -189,9 +189,9 @@ function EntregaCard({
       {/* Address */}
       {entrega.direccion_entrega && (
         <div className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-xs text-gray-300 font-semibold">📍 {entrega.direccion_entrega}</p>
+          <p className="text-xs text-gray-300 font-semibold">{entrega.direccion_entrega}</p>
           {entrega.notas_orden && (
-            <p className="text-xs text-yellow-400 font-semibold mt-1">📝 {entrega.notas_orden}</p>
+            <p className="text-xs text-yellow-400 font-semibold mt-1">{entrega.notas_orden}</p>
           )}
         </div>
       )}
@@ -212,7 +212,7 @@ function EntregaCard({
               border: isSelected ? '1px solid rgba(242,133,0,0.35)' : '1px solid rgba(255,255,255,0.08)',
             }}
           >
-            📍 Ver en mapa
+            Ver en mapa
           </button>
         )}
         {hasCoordenadas && (
@@ -221,7 +221,7 @@ function EntregaCard({
             className="flex-1 py-2 rounded-xl text-xs font-extrabold transition active:scale-95"
             style={{ background: 'rgba(41,128,185,0.12)', color: '#60A5FA', border: '1px solid rgba(41,128,185,0.25)' }}
           >
-            🗺️ Cómo llegar
+            Cómo llegar
           </button>
         )}
         <button
@@ -241,7 +241,7 @@ function EntregaCard({
           className="flex-1 py-2 rounded-xl text-white text-xs font-extrabold transition active:scale-95 disabled:opacity-40"
           style={{ background: 'linear-gradient(135deg, #27AE60 0%, #1E8449 100%)' }}
         >
-          {saving ? '…' : '✓ Entregado'}
+          {saving ? '…' : 'Entregado'}
         </button>
       </div>
     </div>
@@ -357,7 +357,6 @@ export default function RepartidorPage() {
         style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🛵</span>
           <div>
             <h1 className="text-white font-extrabold text-lg leading-none">Mis Entregas</h1>
             <p className="text-gray-400 text-xs mt-0.5">{usuario?.email}</p>
@@ -422,12 +421,12 @@ export default function RepartidorPage() {
                     </p>
                     {selectedEntrega.nombre_cliente && (
                       <p style={{ fontSize: '12px', color: '#D1D5DB', marginBottom: '2px' }}>
-                        👤 {selectedEntrega.nombre_cliente}
+                        {selectedEntrega.nombre_cliente}
                       </p>
                     )}
                     {selectedEntrega.direccion_entrega && (
                       <p style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '8px', lineHeight: '1.4' }}>
-                        📍 {selectedEntrega.direccion_entrega}
+                        {selectedEntrega.direccion_entrega}
                       </p>
                     )}
                     {toNum(selectedEntrega.latitud_entrega) !== null && (
@@ -445,7 +444,7 @@ export default function RepartidorPage() {
                           width: '100%',
                         }}
                       >
-                        🗺️ Cómo llegar
+                        Cómo llegar
                       </button>
                     )}
                   </div>
@@ -470,8 +469,7 @@ export default function RepartidorPage() {
 
           {entregas.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4" style={{ background: '#1A1A1A' }}>
-                🛵
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: '#1A1A1A' }}>
               </div>
               <p className="text-white font-extrabold text-base mb-1">Sin entregas asignadas</p>
               <p className="text-gray-400 text-sm">Las nuevas entregas aparecerán aquí automáticamente</p>

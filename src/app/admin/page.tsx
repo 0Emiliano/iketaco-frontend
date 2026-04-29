@@ -67,18 +67,18 @@ function enviarRepartidorWhatsApp(orden: Orden) {
 
   const mapsLine =
     lat !== null && lng !== null
-      ? `\n🗺️ Destino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+      ? `\nDestino: https://maps.google.com/maps/dir/?api=1&destination=${lat},${lng}`
       : ''
 
   const lineas: (string | null)[] = [
-    `🛵 *NUEVA ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
+    `*NUEVA ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
     '',
-    orden.nombre_cliente    ? `👤 ${orden.nombre_cliente}`    : null,
-    orden.telefono_cliente  ? `📞 ${orden.telefono_cliente}`  : null,
-    orden.direccion_entrega ? `📍 ${orden.direccion_entrega}` : null,
-    items ? `\n🛒 Pedido:\n${items}` : null,
+    orden.nombre_cliente    ? orden.nombre_cliente    : null,
+    orden.telefono_cliente  ? orden.telefono_cliente  : null,
+    orden.direccion_entrega ? orden.direccion_entrega : null,
+    items ? `\nPedido:\n${items}` : null,
     '',
-    `💰 Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
+    `Total: $${parseFloat(String(orden.total)).toFixed(2)}`,
   ]
 
   const msg = lineas.filter((l) => l !== null).join('\n') + mapsLine
@@ -199,7 +199,6 @@ export default function AdminPage() {
         style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">👔</span>
           <div>
             <h1 className="text-white font-extrabold text-lg leading-none">Panel Gerente</h1>
             <p className="text-gray-400 text-xs mt-0.5">{usuario?.email}</p>
@@ -335,8 +334,7 @@ export default function AdminPage() {
                     className="rounded-2xl p-4 flex items-center gap-3"
                     style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
                   >
-                    <span className="text-2xl">⚠️</span>
-                    <div>
+                      <div>
                       <p className="text-white font-extrabold text-sm">Alerta de inventario</p>
                       <p className="text-red-300 text-xs mt-0.5">
                         {dashboard.alertasStock} ingrediente{dashboard.alertasStock > 1 ? 's' : ''} con stock bajo
@@ -350,13 +348,13 @@ export default function AdminPage() {
             {/* Quick links */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cocina',       icon: '🍳', href: '/cocina' },
-                { label: 'Cajero',      icon: '💳', href: '/cajero' },
-                { label: 'Productos',   icon: '🌮', href: '/admin/menu' },
-                { label: 'Mesero',      icon: '🛵', href: '/mesero' },
-                { label: 'Reportes',    icon: '📊', href: '/admin/reports' },
-                { label: 'Empleados',   icon: '👥', href: '/admin/employees' },
-                { label: 'Vista Cliente', icon: '👁️', href: '/menu' },
+                { label: 'Cocina',        href: '/cocina' },
+                { label: 'Cajero',       href: '/cajero' },
+                { label: 'Productos',    href: '/admin/menu' },
+                { label: 'Mesero',       href: '/mesero' },
+                { label: 'Reportes',     href: '/admin/reports' },
+                { label: 'Empleados',    href: '/admin/employees' },
+                { label: 'Vista Cliente', href: '/menu' },
               ].map((l) => (
                 <a
                   key={l.href}
@@ -364,7 +362,6 @@ export default function AdminPage() {
                   className="rounded-2xl p-4 flex items-center gap-3 transition-all active:scale-95"
                   style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <span className="text-2xl">{l.icon}</span>
                   <span className="text-white font-extrabold text-sm">{l.label}</span>
                 </a>
               ))}
@@ -424,7 +421,7 @@ export default function AdminPage() {
                       )}
                       {orden.tipo_servicio === 'domicilio' && orden.direccion_entrega && (
                         <p className="text-gray-500 text-xs mb-1">
-                          📍 {orden.direccion_entrega}
+                          {orden.direccion_entrega}
                         </p>
                       )}
                       <div className="flex items-center justify-between mt-2">

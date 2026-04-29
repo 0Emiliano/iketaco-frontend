@@ -75,7 +75,7 @@ export default function HeroBanner() {
             className="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest self-start"
             style={{ background: 'rgba(242,133,0,0.25)', color: '#F9A825', border: '1px solid rgba(242,133,0,0.4)' }}
           >
-            🔥 Promo del día
+            Promo del día
           </span>
           <h2
             className="text-white font-display leading-tight"

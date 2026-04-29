@@ -119,7 +119,7 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 transition-colors"
                       >
-                        <span>🏠</span> Mi panel
+                        Mi panel
                       </Link>
                     )}
                     <Link
@@ -127,14 +127,14 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 transition-colors"
                     >
-                      <span>🧾</span> Mis pedidos
+                      Mis pedidos
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-4 py-3 text-sm font-bold text-red-400 hover:bg-white/5 transition-colors"
                       style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
                     >
-                      <span>🚪</span> Cerrar sesión
+                      Cerrar sesión
                     </button>
                   </div>
                 </>

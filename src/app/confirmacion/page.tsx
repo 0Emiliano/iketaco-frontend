@@ -12,10 +12,9 @@ function ConfirmacionContent() {
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-4">
       <div
-        className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-6"
+        className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
         style={{ background: '#1A1A1A' }}
       >
-        ✅
       </div>
 
       <h1 className="text-white font-display text-center mb-2" style={{ fontSize: '2.5rem' }}>
@@ -38,7 +37,7 @@ function ConfirmacionContent() {
       )}
 
       <p className="text-gray-400 text-sm font-medium text-center mb-8">
-        Tu pedido está siendo preparado 🌮
+        Tu pedido está siendo preparado
       </p>
 
       <div className="flex flex-col gap-3 w-full max-w-xs">

@@ -18,15 +18,14 @@ export default function CartPage() {
         {isEmpty ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
             <div
-              className="w-24 h-24 rounded-full flex items-center justify-center mb-5 text-5xl"
+              className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
               style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
             >
-              🛒
             </div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
               CARRITO VACÍO
             </h2>
-            <p className="text-gray-400 font-medium mb-8">Agrega algo delicioso del menú 🌮</p>
+            <p className="text-gray-400 font-medium mb-8">Agrega algo delicioso del menú</p>
             <Link
               href="/menu"
               className="px-8 py-4 rounded-2xl text-white font-extrabold text-lg transition-all active:scale-95 hover:opacity-90"

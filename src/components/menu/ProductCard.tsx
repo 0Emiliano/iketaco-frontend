@@ -32,7 +32,6 @@ export default function ProductCard({ producto, index = 0 }: ProductCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="relative z-10 select-none">🌮</span>
         )}
       </div>
 

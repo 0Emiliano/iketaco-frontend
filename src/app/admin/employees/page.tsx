@@ -259,7 +259,7 @@ function RegisterForm({
         </div>
 
         {error && <p className="text-xs text-red-400 font-semibold">{error}</p>}
-        {flash && <p className="text-xs text-emerald-400 font-semibold">✓ {flash}</p>}
+        {flash && <p className="text-xs text-emerald-400 font-semibold">{flash}</p>}
 
         <button
           type="submit" disabled={saving}
@@ -338,7 +338,7 @@ function UserCard({
             className="flex-1 py-2 rounded-xl text-xs font-extrabold transition active:scale-95 disabled:opacity-40"
             style={{ background: 'rgba(255,255,255,0.07)', color: '#D1D5DB', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            ✏️ Cambiar rol
+            Cambiar rol
           </button>
           <button
             onClick={() => onToggleActivo(usuario)}
@@ -349,7 +349,7 @@ function UserCard({
               : { background: 'rgba(39,174,96,0.1)', color: '#34D399', border: '1px solid rgba(39,174,96,0.25)' }
             }
           >
-            {saving ? '…' : isActivo ? '🔒 Desactivar' : '✅ Activar'}
+            {saving ? '…' : isActivo ? 'Desactivar' : 'Activar'}
           </button>
         </div>
       )}
@@ -585,8 +585,7 @@ export default function EmployeesPage() {
         {usuarios.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4" style={{ background: '#1A1A1A' }}>
-              👤
-            </div>
+</div>
             <p className="text-white font-extrabold text-base mb-1">Sin resultados</p>
             <p className="text-gray-400 text-sm">
               {filtroRol !== 'todos' || filtroActivo !== 'todos'

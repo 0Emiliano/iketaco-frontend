@@ -240,9 +240,9 @@ export default function OrderSummary() {
   // ── Submit button label ──
   const btnLabel = () => {
     if (loading) return 'Enviando pedido…'
-    const prefix = esDomicilio ? '🛵 Pedir a domicilio' : '🏪 Realizar Pedido'
+    const prefix = esDomicilio ? 'Pedir a domicilio' : 'Realizar Pedido'
     const suffix = `$${total.toFixed(2)}`
-    if (metodoPago === 'transferencia') return `📱 Pagar por transferencia — ${suffix}`
+    if (metodoPago === 'transferencia') return `Pagar por transferencia — ${suffix}`
     return `${prefix} — ${suffix}`
   }
 
@@ -280,12 +280,12 @@ export default function OrderSummary() {
         <h3 className="text-white font-extrabold text-sm mb-3">Tipo de servicio</h3>
         <div className="flex gap-2">
           <SelectorCard
-            selected={tipoServicio === 'mostrador'} icon="🏪"
+            selected={tipoServicio === 'mostrador'} icon=""
             label="Mostrador" description="Recoge en caja"
             onClick={() => setTipoServicio('mostrador')}
           />
           <SelectorCard
-            selected={tipoServicio === 'domicilio'} icon="🛵"
+            selected={tipoServicio === 'domicilio'} icon=""
             label="Domicilio" description="Envío a domicilio"
             onClick={() => setTipoServicio('domicilio')}
           />
@@ -303,7 +303,7 @@ export default function OrderSummary() {
                 className="w-full py-3 rounded-2xl font-extrabold text-white text-sm flex items-center justify-center gap-2 transition-all active:scale-95 hover:opacity-90"
                 style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)', boxShadow: '0 4px 14px rgba(242,133,0,0.35)' }}
               >
-                <span>📍</span> Compartir mi ubicación
+                Compartir mi ubicación
               </button>
             )}
 
@@ -395,12 +395,12 @@ export default function OrderSummary() {
         <h3 className="text-white font-extrabold text-sm mb-3">Método de pago</h3>
         <div className="flex gap-2">
           <SelectorCard
-            selected={metodoPago === 'efectivo'} icon="💵"
+            selected={metodoPago === 'efectivo'} icon=""
             label="Efectivo" description="Paga en caja"
             onClick={() => setMetodoPago('efectivo')}
           />
           <SelectorCard
-            selected={metodoPago === 'transferencia'} icon="📱"
+            selected={metodoPago === 'transferencia'} icon=""
             label="Transferencia" description="SPEI / QR"
             onClick={() => setMetodoPago('transferencia')}
           />
@@ -416,7 +416,7 @@ export default function OrderSummary() {
             }}
           >
             <p className="text-xs text-orange-300 font-semibold">
-              📋 Te mostraremos los datos bancarios para que realices la transferencia y subas tu comprobante.
+              Te mostraremos los datos bancarios para que realices la transferencia y subas tu comprobante.
             </p>
           </div>
         )}

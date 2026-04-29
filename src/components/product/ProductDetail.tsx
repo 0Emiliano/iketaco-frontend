@@ -36,7 +36,6 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span>🌮</span>
         )}
       </div>
 

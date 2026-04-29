@@ -45,11 +45,11 @@ type EditItem =
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:      { label: '⏳ Pendiente',  color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
-  en_preparacion: { label: '🔥 Preparando', color: '#F28500', bg: 'rgba(242,133,0,0.15)'  },
-  lista:          { label: '✅ Lista',       color: '#27AE60', bg: 'rgba(39,174,96,0.15)'  },
-  entregada:      { label: '🛵 Entregada',  color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
-  cancelada:      { label: '❌ Cancelada',  color: '#E74C3C', bg: 'rgba(231,76,60,0.15)'  },
+  pendiente:      { label: 'Pendiente',  color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
+  en_preparacion: { label: 'Preparando', color: '#F28500', bg: 'rgba(242,133,0,0.15)'  },
+  lista:          { label: 'Lista',      color: '#27AE60', bg: 'rgba(39,174,96,0.15)'  },
+  entregada:      { label: 'Entregada',  color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
+  cancelada:      { label: 'Cancelada',  color: '#E74C3C', bg: 'rgba(231,76,60,0.15)'  },
 }
 
 // ─── Quantity stepper ─────────────────────────────────────────────────────────
@@ -388,10 +388,9 @@ export default function MisPedidosPage() {
         <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div
-              className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-5"
+              className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
               style={{ background: '#1A1A1A' }}
             >
-              🔒
             </div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
               INICIA SESIÓN
@@ -432,10 +431,9 @@ export default function MisPedidosPage() {
         {ordenes.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div
-              className="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-5"
+              className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
               style={{ background: '#1A1A1A' }}
             >
-              🧾
             </div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
               SIN PEDIDOS
@@ -498,12 +496,12 @@ export default function MisPedidosPage() {
                           className="text-xs font-bold px-2 py-0.5 rounded-full"
                           style={{ background: 'rgba(41,128,185,0.15)', color: '#5DADE2' }}
                         >
-                          🛵 Pedido a domicilio
+                          Pedido a domicilio
                         </span>
                       </div>
                       {orden.direccion_entrega && (
                         <p className="text-xs font-medium pl-0.5" style={{ color: '#9CA3AF' }}>
-                          📍 {orden.direccion_entrega}
+                          {orden.direccion_entrega}
                         </p>
                       )}
                     </div>
@@ -536,7 +534,7 @@ export default function MisPedidosPage() {
                               color: '#5DADE2',
                             }}
                           >
-                            🗺️ Ver en mapa
+                            Ver en mapa
                           </button>
                         )}
                       {esPendiente && (
@@ -549,7 +547,7 @@ export default function MisPedidosPage() {
                             color: '#F28500',
                           }}
                         >
-                          ✏️ Modificar
+                          Modificar
                         </button>
                       )}
                       <span className="font-display text-lg" style={{ color: '#F28500' }}>

@@ -35,7 +35,6 @@ export default function CartItem({ item }: CartItemProps) {
         {imagen ? (
           <img src={imagen} alt={nombre} className="w-full h-full object-cover" />
         ) : (
-          <span>🌮</span>
         )}
       </div>
 

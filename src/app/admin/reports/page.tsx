@@ -207,15 +207,9 @@ function RangePicker({
 
 // ─── Section divider ──────────────────────────────────────────────────────────
 
-function SectionDivider({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) {
+function SectionDivider({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="flex items-center gap-4 mt-10 mb-1">
-      <div
-        className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
-        style={{ background: 'rgba(242,133,0,0.12)', border: '1px solid rgba(242,133,0,0.2)' }}
-      >
-        {icon}
-      </div>
       <div>
         <h2 className="text-white font-extrabold text-lg leading-tight">{title}</h2>
         <p className="text-gray-500 text-xs mt-0.5">{subtitle}</p>
@@ -329,7 +323,7 @@ export default function ReportsPage() {
         {/* ════════════════════════════════════════════════════
             SECCIÓN 1 — COMPARATIVO DE VENTAS
         ════════════════════════════════════════════════════ */}
-        <SectionDivider icon="📊" title="Comparativo de ventas" subtitle="Compara dos períodos de tiempo" />
+        <SectionDivider title="Comparativo de ventas" subtitle="Compara dos períodos de tiempo" />
 
         <section className="mt-4">
           <div className="flex flex-col sm:flex-row gap-3">
@@ -348,7 +342,7 @@ export default function ReportsPage() {
           >
             {cmpLoading
               ? <span className="flex items-center justify-center gap-2"><Spinner /> Comparando…</span>
-              : '📊 Comparar períodos'}
+              : 'Comparar períodos'}
           </button>
 
           {cmpError && (
@@ -398,14 +392,13 @@ export default function ReportsPage() {
                   </thead>
                   <tbody>
                     {[
-                      { icon: '💰', label: 'Total ventas',    v1: fmt$(cmpData.periodo1.totalVentas),    v2: fmt$(cmpData.periodo2.totalVentas),    var: cmpData.variacion.totalVentas,    money: true  },
-                      { icon: '🧾', label: 'Total órdenes',   v1: String(cmpData.periodo1.totalOrdenes), v2: String(cmpData.periodo2.totalOrdenes), var: cmpData.variacion.totalOrdenes,   money: false },
-                      { icon: '🎯', label: 'Ticket promedio', v1: fmt$(cmpData.periodo1.ticketPromedio), v2: fmt$(cmpData.periodo2.ticketPromedio), var: cmpData.variacion.ticketPromedio, money: true  },
+                      { icon: '', label: 'Total ventas',    v1: fmt$(cmpData.periodo1.totalVentas),    v2: fmt$(cmpData.periodo2.totalVentas),    var: cmpData.variacion.totalVentas,    money: true  },
+                      { icon: '', label: 'Total órdenes',   v1: String(cmpData.periodo1.totalOrdenes), v2: String(cmpData.periodo2.totalOrdenes), var: cmpData.variacion.totalOrdenes,   money: false },
+                      { icon: '', label: 'Ticket promedio', v1: fmt$(cmpData.periodo1.ticketPromedio), v2: fmt$(cmpData.periodo2.ticketPromedio), var: cmpData.variacion.ticketPromedio, money: true  },
                     ].map((row, i, arr) => (
                       <tr key={row.label} style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : undefined }}>
                         <td className="py-3 pl-5 pr-4">
                           <div className="flex items-center gap-2">
-                            <span>{row.icon}</span>
                             <span className="text-sm font-bold text-slate-300">{row.label}</span>
                           </div>
                         </td>
@@ -464,7 +457,6 @@ export default function ReportsPage() {
               </div>
             ) : (
               <div className="rounded-2xl px-5 py-8 text-center" style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <p className="text-3xl mb-3">📭</p>
                 <p className="text-white font-extrabold">Sin ventas en los períodos seleccionados</p>
                 <p className="text-gray-400 text-sm mt-1">No se registraron órdenes completadas en ninguno de los dos rangos de fechas.</p>
               </div>
@@ -475,7 +467,7 @@ export default function ReportsPage() {
         {/* ════════════════════════════════════════════════════
             SECCIÓN 2 — REPORTE DE INVENTARIO
         ════════════════════════════════════════════════════ */}
-        <SectionDivider icon="📦" title="Reporte de inventario" subtitle="Consumo de ingredientes por período" />
+        <SectionDivider title="Reporte de inventario" subtitle="Consumo de ingredientes por período" />
 
         <section className="mt-4">
           <div
@@ -496,7 +488,7 @@ export default function ReportsPage() {
           >
             {invLoading
               ? <span className="flex items-center justify-center gap-2"><Spinner /> Generando reporte…</span>
-              : '📦 Generar reporte de inventario'}
+              : 'Generar reporte de inventario'}
           </button>
 
           {invError && (
@@ -513,17 +505,16 @@ export default function ReportsPage() {
             {/* Resumen cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { icon: '🧂', label: 'Ingredientes',  value: String(invData.resumen.totalIngredientes), color: '#27AE60' },
-                { icon: '📋', label: 'Movimientos',   value: String(invData.resumen.totalMovimientos),  color: '#2980B9' },
-                { icon: '💸', label: 'Costo total',   value: fmt$(invData.resumen.costoTotalConsumo),   color: '#F28500' },
-                { icon: '⚠️',  label: 'Sin costo',    value: String(invData.resumen.ingredientesSinCosto), color: invData.resumen.ingredientesSinCosto > 0 ? '#F59E0B' : '#9CA3AF' },
+                { icon: '', label: 'Ingredientes',  value: String(invData.resumen.totalIngredientes), color: '#27AE60' },
+                { icon: '', label: 'Movimientos',   value: String(invData.resumen.totalMovimientos),  color: '#2980B9' },
+                { icon: '', label: 'Costo total',   value: fmt$(invData.resumen.costoTotalConsumo),   color: '#F28500' },
+                { icon: '',  label: 'Sin costo',    value: String(invData.resumen.ingredientesSinCosto), color: invData.resumen.ingredientesSinCosto > 0 ? '#F59E0B' : '#9CA3AF' },
               ].map((card) => (
                 <div key={card.label}
                   className="rounded-2xl p-4 flex flex-col gap-1"
                   style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.07)' }}
                 >
-                  <span className="text-xl">{card.icon}</span>
-                  <p className="text-xs font-bold text-gray-400 mt-1">{card.label}</p>
+                    <p className="text-xs font-bold text-gray-400">{card.label}</p>
                   <p className="text-lg font-extrabold tabular-nums" style={{ color: card.color }}>{card.value}</p>
                 </div>
               ))}
@@ -548,7 +539,6 @@ export default function ReportsPage() {
             {invData.resumen.costoParcial && (
               <div className="rounded-2xl px-4 py-3 flex items-start gap-3"
                 style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
-                <span className="text-base mt-0.5">⚠️</span>
                 <p className="text-sm text-yellow-300 font-semibold">
                   Costo parcial: {invData.resumen.ingredientesSinCosto} ingrediente{invData.resumen.ingredientesSinCosto !== 1 ? 's' : ''} sin
                   precio unitario configurado. El costo total mostrado es aproximado.
@@ -658,7 +648,6 @@ export default function ReportsPage() {
               </div>
             ) : (
               <div className="rounded-2xl px-5 py-8 text-center" style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <p className="text-3xl mb-3">📦</p>
                 <p className="text-white font-extrabold">Sin movimientos de inventario</p>
                 <p className="text-gray-400 text-sm mt-1">No se registró consumo de ingredientes en el período seleccionado.</p>
               </div>
