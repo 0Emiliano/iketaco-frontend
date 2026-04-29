@@ -59,8 +59,7 @@ export default function PopularSection() {
                   alt={producto.nombre}
                   className="w-full h-full object-cover rounded-xl"
                 />
-              ) : (
-              )}
+              ) : null}
             </div>
 
             {/* Info */}

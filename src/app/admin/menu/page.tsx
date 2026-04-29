@@ -340,8 +340,7 @@ export default function AdminMenuPage() {
                         >
                           {producto.imagen_url ? (
                             <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
-                          ) : (
-                            )}
+                          ) : null}
                         </div>
 
                         {/* Info */}

@@ -35,8 +35,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
             alt={producto.nombre}
             className="w-full h-full object-cover"
           />
-        ) : (
-        )}
+        ) : null}
       </div>
 
       <div className="flex-1 px-4 pt-6 pb-32 max-w-lg mx-auto w-full">

@@ -31,8 +31,7 @@ export default function ProductCard({ producto, index = 0 }: ProductCardProps) {
             alt={producto.nombre}
             className="w-full h-full object-cover"
           />
-        ) : (
-        )}
+        ) : null}
       </div>
 
       {/* Info */}

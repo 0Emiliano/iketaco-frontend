@@ -68,8 +68,7 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
                   alt={combo.nombre}
                   className="w-full h-full object-cover rounded-xl"
                 />
-              ) : (
-                    )}
+              ) : null}
             </div>
 
             {/* Info */}
