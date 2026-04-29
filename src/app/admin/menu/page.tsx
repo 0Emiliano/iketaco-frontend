@@ -48,6 +48,7 @@ export default function AdminMenuPage() {
 
   // producto seleccionado para editar
   const [seleccionado, setSeleccionado] = useState<Producto | null>(null)
+  const [modo, setModo] = useState<'editar' | 'nuevo'>('editar')
 
   // formulario de texto
   const [form, setForm] = useState<ProductoForm>(FORM_VACIO)
@@ -93,6 +94,7 @@ export default function AdminMenuPage() {
 
   // ─── Seleccionar producto para editar ───────────────────────────────────────
   const abrirEdicion = (producto: Producto) => {
+    setModo('editar')
     setSeleccionado(producto)
     setForm({
       nombre: producto.nombre,
@@ -107,8 +109,19 @@ export default function AdminMenuPage() {
     setImagenError('')
   }
 
+  const abrirNuevo = () => {
+    setModo('nuevo')
+    setSeleccionado(null)
+    setForm(FORM_VACIO)
+    setFormErrors({})
+    setImagenFile(null)
+    setImagenPreview(null)
+    setImagenError('')
+  }
+
   const cerrarEdicion = () => {
     setSeleccionado(null)
+    setModo('editar')
     setImagenFile(null)
     setImagenPreview(null)
     setImagenError('')
@@ -181,8 +194,6 @@ export default function AdminMenuPage() {
 
   // ─── Guardar campos de texto ─────────────────────────────────────────────────
   const handleGuardar = async () => {
-    if (!seleccionado) return
-
     const errors = validar(form)
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors)
@@ -191,17 +202,29 @@ export default function AdminMenuPage() {
 
     setGuardando(true)
     try {
-      const res = await apiClient.patch(`/admin/menu/productos/${seleccionado.id}`, {
+      const payload = {
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim() || undefined,
         precioBase: parseFloat(form.precioBase),
         categoriaId: parseInt(form.categoriaId),
         disponible: form.disponible,
-      })
-      const actualizado: Producto = res.data
-      setProductos((prev) => prev.map((p) => (p.id === actualizado.id ? actualizado : p)))
-      setSeleccionado(actualizado)
-      toast('Producto actualizado correctamente')
+      }
+
+      if (modo === 'nuevo') {
+        const res = await apiClient.post('/admin/menu/productos', payload)
+        const creado: Producto = res.data
+        setProductos((prev) => [creado, ...prev])
+        setModo('editar')
+        setSeleccionado(creado)
+        toast('Producto creado correctamente')
+      } else {
+        if (!seleccionado) return
+        const res = await apiClient.patch(`/admin/menu/productos/${seleccionado.id}`, payload)
+        const actualizado: Producto = res.data
+        setProductos((prev) => prev.map((p) => (p.id === actualizado.id ? actualizado : p)))
+        setSeleccionado(actualizado)
+        toast('Producto actualizado correctamente')
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? 'Error al guardar los cambios'
       toast(msg, 'error')
@@ -233,10 +256,20 @@ export default function AdminMenuPage() {
             <path d="M19 12H5M5 12l7 7M5 12l7-7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </Link>
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-white font-extrabold text-lg leading-none">Gestión de Productos</h1>
           <p className="text-gray-400 text-xs mt-0.5">{productos.length} productos</p>
         </div>
+        <button
+          onClick={abrirNuevo}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-white text-sm font-extrabold transition-all active:scale-95 flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+          Nuevo
+        </button>
       </div>
 
       <main className="pt-20 pb-10 px-4 max-w-5xl mx-auto">
@@ -349,8 +382,8 @@ export default function AdminMenuPage() {
               )}
             </div>
 
-            {/* ── Panel de edición ────────────────────────────────────────── */}
-            {seleccionado && (
+            {/* ── Panel de edición / creación ─────────────────────────────── */}
+            {(seleccionado || modo === 'nuevo') && (
               <div
                 className="w-full lg:w-96 flex-shrink-0 rounded-3xl p-5 self-start lg:sticky lg:top-24"
                 style={{ background: '#141414', border: '1px solid rgba(255,255,255,0.08)' }}
@@ -358,9 +391,11 @@ export default function AdminMenuPage() {
                 {/* Cabecera del panel */}
                 <div className="flex items-center justify-between mb-5">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F28500' }}>Editando</p>
+                    <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F28500' }}>
+                      {modo === 'nuevo' ? 'Nuevo producto' : 'Editando'}
+                    </p>
                     <h2 className="text-white font-extrabold text-lg leading-tight truncate max-w-[220px]">
-                      {seleccionado.nombre}
+                      {modo === 'nuevo' ? 'Agregar producto' : seleccionado!.nombre}
                     </h2>
                   </div>
                   <button
@@ -375,8 +410,8 @@ export default function AdminMenuPage() {
                   </button>
                 </div>
 
-                {/* ── Sección imagen ─────────────────────────────────────── */}
-                <section className="mb-5">
+                {/* ── Sección imagen (solo en modo edición) ─────────────── */}
+                <section className="mb-5" style={{ display: modo === 'nuevo' ? 'none' : undefined }}>
                   <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">Imagen</p>
 
                   {/* Preview */}
@@ -396,8 +431,8 @@ export default function AdminMenuPage() {
                           </span>
                         </div>
                       </>
-                    ) : seleccionado.imagen_url ? (
-                      <img src={seleccionado.imagen_url} alt={seleccionado.nombre} className="w-full h-full object-cover" />
+                    ) : seleccionado?.imagen_url ? (
+                      <img src={seleccionado.imagen_url} alt={seleccionado?.nombre} className="w-full h-full object-cover" />
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-gray-500">
                         <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
@@ -460,7 +495,7 @@ export default function AdminMenuPage() {
                   )}
                 </section>
 
-                <div className="h-px mb-5" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                {modo !== 'nuevo' && <div className="h-px mb-5" style={{ background: 'rgba(255,255,255,0.06)' }} />}
 
                 {/* ── Sección datos ──────────────────────────────────────── */}
                 <section>
@@ -593,6 +628,8 @@ export default function AdminMenuPage() {
                         </svg>
                         Guardando...
                       </>
+                    ) : modo === 'nuevo' ? (
+                      'Crear producto'
                     ) : (
                       'Guardar cambios'
                     )}
