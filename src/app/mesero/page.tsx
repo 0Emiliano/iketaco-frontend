@@ -45,7 +45,7 @@ function MeseroProductCard({
         className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center text-3xl"
         style={{ background: '#2A2A2A' }}
       >
-        {producto.imagen_url ? (
+        {producto.imagen_url && (
           <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
         )}
       </div>
@@ -96,7 +96,7 @@ function MeseroComboCard({
         className="w-16 h-16 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center text-3xl"
         style={{ background: '#2A2A2A' }}
       >
-        {combo.imagen_url ? (
+        {combo.imagen_url && (
           <img src={combo.imagen_url} alt={combo.nombre} className="w-full h-full object-cover" />
         )}
       </div>
