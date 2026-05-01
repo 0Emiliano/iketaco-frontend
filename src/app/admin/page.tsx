@@ -85,6 +85,23 @@ function enviarRepartidorWhatsApp(orden: Orden) {
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener')
 }
 
+const TRANSICIONES: Record<string, { estado: string; label: string; color: string }[]> = {
+  pendiente:      [
+    { estado: 'en_preparacion', label: 'Iniciar preparación', color: '#F28500' },
+    { estado: 'cancelada',      label: 'Cancelar',            color: '#E74C3C' },
+  ],
+  en_preparacion: [
+    { estado: 'lista',     label: 'Marcar lista',  color: '#27AE60' },
+    { estado: 'cancelada', label: 'Cancelar',      color: '#E74C3C' },
+  ],
+  lista: [
+    { estado: 'entregada', label: 'Marcar entregada', color: '#2980B9' },
+    { estado: 'cancelada', label: 'Cancelar',         color: '#E74C3C' },
+  ],
+  entregada: [],
+  cancelada:  [],
+}
+
 type Tab = 'dashboard' | 'ordenes'
 
 export default function AdminPage() {
@@ -96,6 +113,7 @@ export default function AdminPage() {
   const [ordenes, setOrdenes] = useState<Orden[]>([])
   const [loading, setLoading] = useState(true)
   const [servicioLoading, setServicioLoading] = useState(false)
+  const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null)
   const [usuario, setUsuario] = useState<{ email: string; rol: string } | null>(null)
 
   useEffect(() => {
@@ -162,6 +180,19 @@ export default function AdminPage() {
       setServicioError(err?.response?.data?.error ?? 'Error al cambiar servicio')
     } finally {
       setServicioLoading(false)
+    }
+  }
+
+  const cambiarEstado = async (ordenId: number, nuevoEstado: string) => {
+    setCambiandoEstado(ordenId)
+    try {
+      await apiClient.patch(`/orders/${ordenId}/status`, { estado: nuevoEstado })
+      await fetchOrdenes()
+      fetchDashboard()
+    } catch {
+      // silent — en producción se puede mostrar un toast
+    } finally {
+      setCambiandoEstado(null)
     }
   }
 
@@ -433,6 +464,27 @@ export default function AdminPage() {
                           ${parseFloat(orden.total).toFixed(2)}
                         </span>
                       </div>
+                      {/* Botones de cambio de estado */}
+                      {(TRANSICIONES[orden.estado] ?? []).length > 0 && (
+                        <div className="flex gap-2 mt-3">
+                          {(TRANSICIONES[orden.estado] ?? []).map((t) => (
+                            <button
+                              key={t.estado}
+                              onClick={() => cambiarEstado(orden.id, t.estado)}
+                              disabled={cambiandoEstado === orden.id}
+                              className="flex-1 py-2 rounded-xl text-xs font-extrabold transition active:scale-95 disabled:opacity-40"
+                              style={{
+                                background: `${t.color}22`,
+                                color: t.color,
+                                border: `1px solid ${t.color}55`,
+                              }}
+                            >
+                              {cambiandoEstado === orden.id ? '...' : t.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
                       {orden.tipo_servicio === 'domicilio' && (
                         <button
                           onClick={() => enviarRepartidorWhatsApp(orden)}
