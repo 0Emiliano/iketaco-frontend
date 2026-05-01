@@ -355,6 +355,7 @@ export default function AdminPage() {
                 { label: 'Reportes',           href: '/admin/reports' },
                 { label: 'Empleados',          href: '/admin/employees' },
                 { label: 'Gestionar Recetas',  href: '/admin/recipes' },
+                { label: 'Ingredientes',       href: '/admin/ingredients' },
                 { label: 'Inv. Ingredientes',  href: '/admin/inventory-report' },
                 { label: 'Vista Cliente',      href: '/menu' },
               ].map((l) => (
