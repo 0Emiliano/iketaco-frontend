@@ -348,13 +348,15 @@ export default function AdminPage() {
             {/* Quick links */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cocina',        href: '/cocina' },
-                { label: 'Cajero',       href: '/cajero' },
-                { label: 'Productos',    href: '/admin/menu' },
-                { label: 'Mesero',       href: '/mesero' },
-                { label: 'Reportes',     href: '/admin/reports' },
-                { label: 'Empleados',    href: '/admin/employees' },
-                { label: 'Vista Cliente', href: '/menu' },
+                { label: 'Cocina',              href: '/cocina' },
+                { label: 'Cajero',             href: '/cajero' },
+                { label: 'Productos',          href: '/admin/menu' },
+                { label: 'Mesero',             href: '/mesero' },
+                { label: 'Reportes',           href: '/admin/reports' },
+                { label: 'Empleados',          href: '/admin/employees' },
+                { label: 'Gestionar Recetas',  href: '/admin/recipes' },
+                { label: 'Inv. Ingredientes',  href: '/admin/inventory-report' },
+                { label: 'Vista Cliente',      href: '/menu' },
               ].map((l) => (
                 <a
                   key={l.href}
