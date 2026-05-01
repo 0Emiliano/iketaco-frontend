@@ -423,16 +423,88 @@ export default function AdminPage() {
             {/* Quick links */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cocina', href: '/cocina' },
-                { label: 'Cajero', href: '/cajero' },
-                { label: 'Productos', href: '/admin/menu' },
-                { label: 'Mesero', href: '/mesero' },
-                { label: 'Reportes', href: '/admin/reports' },
-                { label: 'Empleados', href: '/admin/employees' },
-                { label: 'Gestionar Recetas', href: '/admin/recipes' },
-                { label: 'Ingredientes', href: '/admin/ingredients' },
-                { label: 'Inv. Ingredientes', href: '/admin/inventory-report' },
-                { label: 'Vista Cliente', href: '/menu' },
+                {
+                  label: 'Cocina',
+                  sub: 'Panel de cocineros',
+                  href: '/cocina',
+                  color: '#E67E22',
+                  bg: 'rgba(230,126,34,0.15)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
+                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                      <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="3" />
+                      <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="3" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'Cajero',
+                  sub: 'Cobros y pagos',
+                  href: '/cajero',
+                  color: '#27AE60',
+                  bg: 'rgba(39,174,96,0.15)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                      <line x1="1" y1="10" x2="23" y2="10" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'Mesero',
+                  sub: 'Tomar pedidos',
+                  href: '/mesero',
+                  color: '#2980B9',
+                  bg: 'rgba(41,128,185,0.15)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'Recetas',
+                  sub: 'Ingredientes por producto',
+                  href: '/admin/recipes',
+                  color: '#8B5CF6',
+                  bg: 'rgba(139,92,246,0.15)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'Consumo',
+                  sub: 'Reporte de inventario',
+                  href: '/admin/inventory-report',
+                  color: '#F28500',
+                  bg: 'rgba(242,133,0,0.15)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                  ),
+                },
+                {
+                  label: 'Vista Cliente',
+                  sub: 'Ver menú público',
+                  href: '/menu',
+                  color: '#9CA3AF',
+                  bg: 'rgba(156,163,175,0.12)',
+                  icon: (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ),
+                },
               ].map((l) => (
                 <a
                   key={l.href}
@@ -440,7 +512,16 @@ export default function AdminPage() {
                   className="rounded-2xl p-4 flex items-center gap-3 transition-all active:scale-95"
                   style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
                 >
-                  <span className="text-white font-extrabold text-sm">{l.label}</span>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: l.bg, color: l.color }}
+                  >
+                    {l.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-white font-extrabold text-sm leading-tight">{l.label}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 leading-tight truncate">{l.sub}</p>
+                  </div>
                 </a>
               ))}
             </div>
