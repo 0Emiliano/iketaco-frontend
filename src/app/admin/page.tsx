@@ -302,7 +302,7 @@ export default function AdminPage() {
         ))}
       </div>
 
-      <main className="pt-28 pb-10 px-4 max-w-4xl mx-auto">
+      <main className="pt-28 pb-24 px-4 max-w-4xl mx-auto">
         {/* ── DASHBOARD TAB ─────────────────────────────── */}
         {tab === 'dashboard' && (
           <div className="space-y-5 mt-2">

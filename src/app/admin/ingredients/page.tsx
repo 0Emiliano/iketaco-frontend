@@ -458,7 +458,7 @@ export default function IngredientsPage() {
         </div>
       </div>
 
-      <main className="pt-20 pb-10 px-4 max-w-3xl mx-auto flex flex-col gap-4">
+      <main className="pt-20 pb-24 px-4 max-w-3xl mx-auto flex flex-col gap-4">
 
         {/* Buscador */}
         <div className="relative mt-2">

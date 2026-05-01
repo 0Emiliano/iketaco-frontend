@@ -152,7 +152,7 @@ export default function InventoryReportPage() {
         </div>
       </div>
 
-      <main className="pt-20 pb-10 px-4 max-w-3xl mx-auto flex flex-col gap-5">
+      <main className="pt-20 pb-24 px-4 max-w-3xl mx-auto flex flex-col gap-5">
 
         {/* ── Filtros de fecha ── */}
         <div

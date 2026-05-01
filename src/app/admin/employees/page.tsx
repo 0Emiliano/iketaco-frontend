@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import NavComponent from '@/components/ui/NavComponent'
+import Link from 'next/link'
 import apiClient from '@/lib/api/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -494,25 +494,33 @@ export default function EmployeesPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
-      <NavComponent title="Empleados" />
-
-      <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
-
-        {/* ── Page header ── */}
-        <div className="flex items-center justify-between mt-2 mb-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-orange-400 font-bold">Panel gerente</p>
-            <h1 className="text-white font-display mt-1" style={{ fontSize: '1.75rem' }}>Usuarios</h1>
-          </div>
-          <button
-            onClick={() => setShowForm(f => !f)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-extrabold text-white transition active:scale-95"
-            style={{ background: showForm ? 'rgba(255,255,255,0.08)' : 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+      {/* Header */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between"
+        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+      >
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin"
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition text-lg font-bold"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
+            aria-label="Volver"
           >
-            <span style={{ fontSize: '1rem', lineHeight: 1 }}>{showForm ? '✕' : '＋'}</span>
-            {showForm ? 'Cerrar' : 'Registrar empleado'}
-          </button>
+            ‹
+          </Link>
+          <h1 className="text-white font-extrabold text-base">Empleados</h1>
         </div>
+        <button
+          onClick={() => setShowForm(f => !f)}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold text-white transition active:scale-95"
+          style={{ background: showForm ? 'rgba(255,255,255,0.08)' : 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+        >
+          <span style={{ fontSize: '1rem', lineHeight: 1 }}>{showForm ? '✕' : '＋'}</span>
+          {showForm ? 'Cerrar' : 'Nuevo'}
+        </button>
+      </div>
+
+      <main className="px-4 pt-20 pb-24 max-w-lg mx-auto w-full">
 
         {/* ── Register form (collapsible) ── */}
         {showForm && token && (

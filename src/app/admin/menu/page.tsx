@@ -272,7 +272,7 @@ export default function AdminMenuPage() {
         </button>
       </div>
 
-      <main className="pt-20 pb-10 px-4 max-w-5xl mx-auto">
+      <main className="pt-20 pb-24 px-4 max-w-5xl mx-auto">
         {/* Error de carga */}
         {fetchError && (
           <div className="flex flex-col items-center justify-center py-16 text-center">

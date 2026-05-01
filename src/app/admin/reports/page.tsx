@@ -318,7 +318,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <main className="pt-20 pb-16 px-4 max-w-4xl mx-auto">
+      <main className="pt-20 pb-24 px-4 max-w-4xl mx-auto">
 
         {/* ════════════════════════════════════════════════════
             SECCIÓN 1 — COMPARATIVO DE VENTAS
