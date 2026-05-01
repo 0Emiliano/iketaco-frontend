@@ -37,15 +37,16 @@ interface Orden {
   total: string
   creado_en: string
   orden_detalles?: { id: number; cantidad: number; productos: { nombre: string } }[]
-  orden_combos?:   { id: number; cantidad: number; combos:   { nombre: string } }[]
+  orden_combos?: { id: number; cantidad: number; combos: { nombre: string } }[]
 }
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:      { label: 'Pendiente',     color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
-  en_preparacion: { label: 'En preparación',color: '#F28500', bg: 'rgba(242,133,0,0.15)' },
-  lista:          { label: 'Lista',          color: '#27AE60', bg: 'rgba(39,174,96,0.15)' },
-  entregada:      { label: 'Entregada',     color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
-  cancelada:      { label: 'Cancelada',     color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' },
+  pendiente: { label: 'Pendiente', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
+  en_preparacion: { label: 'En preparación', color: '#F28500', bg: 'rgba(242,133,0,0.15)' },
+  lista: { label: 'Lista / Preparada', color: '#27AE60', bg: 'rgba(39,174,96,0.15)' },
+  entregada: { label: 'Entregada', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
+  pagada: { label: 'Pagada', color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)' },
+  cancelada: { label: 'Cancelada', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' },
 }
 
 // ─── WhatsApp helpers ─────────────────────────────────────────────────────────
@@ -62,8 +63,10 @@ function enviarRepartidorWhatsApp(orden: Orden) {
 
   const items = [
     ...(orden.orden_detalles ?? []).map((d) => `• ${d.cantidad}× ${d.productos?.nombre}`),
-    ...(orden.orden_combos   ?? []).map((c) => `• ${c.cantidad}× ${c.combos?.nombre}`),
-  ].filter(Boolean).join('\n')
+    ...(orden.orden_combos ?? []).map((c) => `• ${c.cantidad}× ${c.combos?.nombre}`),
+  ]
+    .filter(Boolean)
+    .join('\n')
 
   const mapsLine =
     lat !== null && lng !== null
@@ -73,8 +76,8 @@ function enviarRepartidorWhatsApp(orden: Orden) {
   const lineas: (string | null)[] = [
     `*NUEVA ENTREGA — ${orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}*`,
     '',
-    orden.nombre_cliente    ? orden.nombre_cliente    : null,
-    orden.telefono_cliente  ? orden.telefono_cliente  : null,
+    orden.nombre_cliente ? orden.nombre_cliente : null,
+    orden.telefono_cliente ? orden.telefono_cliente : null,
     orden.direccion_entrega ? orden.direccion_entrega : null,
     items ? `\nPedido:\n${items}` : null,
     '',
@@ -85,21 +88,39 @@ function enviarRepartidorWhatsApp(orden: Orden) {
   window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank', 'noopener')
 }
 
-const TRANSICIONES: Record<string, { estado: string; label: string; color: string }[]> = {
-  pendiente:      [
+type BtnTransicion = { estado: string; label: string; color: string }
+
+// Transiciones comunes a todos los tipos de servicio
+const TRANSICIONES_BASE: Record<string, BtnTransicion[]> = {
+  pendiente: [
     { estado: 'en_preparacion', label: 'Iniciar preparación', color: '#F28500' },
-    { estado: 'cancelada',      label: 'Cancelar',            color: '#E74C3C' },
+    { estado: 'cancelada', label: 'Cancelar', color: '#E74C3C' },
   ],
   en_preparacion: [
-    { estado: 'lista',     label: 'Marcar lista',  color: '#27AE60' },
-    { estado: 'cancelada', label: 'Cancelar',      color: '#E74C3C' },
+    { estado: 'lista', label: 'Marcar lista / Cocinada', color: '#27AE60' },
+    { estado: 'cancelada', label: 'Cancelar', color: '#E74C3C' },
   ],
-  lista: [
-    { estado: 'entregada', label: 'Marcar entregada', color: '#2980B9' },
-    { estado: 'cancelada', label: 'Cancelar',         color: '#E74C3C' },
-  ],
+  // 'lista' se resuelve dinámicamente según tipo_servicio (ver getTransicionesOrden)
   entregada: [],
-  cancelada:  [],
+  pagada: [],
+  cancelada: [],
+}
+
+// Botones desde 'lista' según tipo de servicio
+const LISTA_DOMICILIO: BtnTransicion[] = [
+  { estado: 'entregada', label: 'Marcar entregada', color: '#2980B9' },
+  { estado: 'cancelada', label: 'Cancelar', color: '#E74C3C' },
+]
+const LISTA_LOCAL: BtnTransicion[] = [
+  { estado: 'pagada', label: 'Cobrar / Pagada', color: '#8B5CF6' },
+  { estado: 'cancelada', label: 'Cancelar', color: '#E74C3C' },
+]
+
+function getTransicionesOrden(orden: Orden): BtnTransicion[] {
+  if (orden.estado === 'lista') {
+    return orden.tipo_servicio === 'domicilio' ? LISTA_DOMICILIO : LISTA_LOCAL
+  }
+  return TRANSICIONES_BASE[orden.estado] ?? []
 }
 
 type Tab = 'dashboard' | 'ordenes'
@@ -119,9 +140,15 @@ export default function AdminPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const raw = localStorage.getItem('usuario')
-      if (!raw) { router.push('/login'); return }
+      if (!raw) {
+        router.push('/login')
+        return
+      }
       const u = JSON.parse(raw)
-      if (u.rol !== 'gerente') { router.push('/menu'); return }
+      if (u.rol !== 'gerente') {
+        router.push('/menu')
+        return
+      }
       setUsuario(u)
     }
   }, [router])
@@ -306,8 +333,8 @@ export default function AdminPage() {
                 {servicioLoading
                   ? 'Procesando...'
                   : servicioAbierto
-                  ? 'Cerrar Servicio'
-                  : 'Abrir Servicio'}
+                    ? 'Cerrar Servicio'
+                    : 'Abrir Servicio'}
               </button>
             </div>
 
@@ -316,9 +343,21 @@ export default function AdminPage() {
               <>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'Órdenes hoy',   value: dashboard.resumenHoy.totalOrdenes,               color: '#F28500' },
-                    { label: 'Ticket prom.',   value: `$${dashboard.resumenHoy.ticketPromedio.toFixed(0)}`, color: '#27AE60' },
-                    { label: 'Ventas hoy',     value: `$${dashboard.resumenHoy.totalVentas.toFixed(0)}`,    color: '#2980B9' },
+                    {
+                      label: 'Órdenes hoy',
+                      value: dashboard.resumenHoy.totalOrdenes,
+                      color: '#F28500',
+                    },
+                    {
+                      label: 'Ticket prom.',
+                      value: `$${dashboard.resumenHoy.ticketPromedio.toFixed(0)}`,
+                      color: '#27AE60',
+                    },
+                    {
+                      label: 'Ventas hoy',
+                      value: `$${dashboard.resumenHoy.totalVentas.toFixed(0)}`,
+                      color: '#2980B9',
+                    },
                   ].map((s) => (
                     <div
                       key={s.label}
@@ -334,41 +373,46 @@ export default function AdminPage() {
                 </div>
 
                 {/* Estado de órdenes activas */}
-                {dashboard.ordenesPorEstado && Object.keys(dashboard.ordenesPorEstado).length > 0 && (
-                  <div
-                    className="rounded-2xl p-4"
-                    style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
-                  >
-                    <h2 className="text-white font-extrabold text-base mb-3">Órdenes activas</h2>
-                    <div className="flex flex-col gap-2">
-                      {Object.entries(dashboard.ordenesPorEstado).map(([estado, count]) => {
-                        const cfg = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG['pendiente']
-                        return (
-                          <div key={estado} className="flex items-center justify-between">
-                            <span
-                              className="text-xs font-bold px-2 py-1 rounded-full"
-                              style={{ background: cfg.bg, color: cfg.color }}
-                            >
-                              {cfg.label}
-                            </span>
-                            <span className="text-white font-extrabold">{count}</span>
-                          </div>
-                        )
-                      })}
+                {dashboard.ordenesPorEstado &&
+                  Object.keys(dashboard.ordenesPorEstado).length > 0 && (
+                    <div
+                      className="rounded-2xl p-4"
+                      style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                    >
+                      <h2 className="text-white font-extrabold text-base mb-3">Órdenes activas</h2>
+                      <div className="flex flex-col gap-2">
+                        {Object.entries(dashboard.ordenesPorEstado).map(([estado, count]) => {
+                          const cfg = ESTADO_CONFIG[estado] ?? ESTADO_CONFIG['pendiente']
+                          return (
+                            <div key={estado} className="flex items-center justify-between">
+                              <span
+                                className="text-xs font-bold px-2 py-1 rounded-full"
+                                style={{ background: cfg.bg, color: cfg.color }}
+                              >
+                                {cfg.label}
+                              </span>
+                              <span className="text-white font-extrabold">{count}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Alertas de stock */}
                 {dashboard.alertasStock > 0 && (
                   <div
                     className="rounded-2xl p-4 flex items-center gap-3"
-                    style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
+                    style={{
+                      background: 'rgba(231,76,60,0.1)',
+                      border: '1px solid rgba(231,76,60,0.3)',
+                    }}
                   >
-                      <div>
+                    <div>
                       <p className="text-white font-extrabold text-sm">Alerta de inventario</p>
                       <p className="text-red-300 text-xs mt-0.5">
-                        {dashboard.alertasStock} ingrediente{dashboard.alertasStock > 1 ? 's' : ''} con stock bajo
+                        {dashboard.alertasStock} ingrediente{dashboard.alertasStock > 1 ? 's' : ''}{' '}
+                        con stock bajo
                       </p>
                     </div>
                   </div>
@@ -379,16 +423,16 @@ export default function AdminPage() {
             {/* Quick links */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Cocina',              href: '/cocina' },
-                { label: 'Cajero',             href: '/cajero' },
-                { label: 'Productos',          href: '/admin/menu' },
-                { label: 'Mesero',             href: '/mesero' },
-                { label: 'Reportes',           href: '/admin/reports' },
-                { label: 'Empleados',          href: '/admin/employees' },
-                { label: 'Gestionar Recetas',  href: '/admin/recipes' },
-                { label: 'Ingredientes',       href: '/admin/ingredients' },
-                { label: 'Inv. Ingredientes',  href: '/admin/inventory-report' },
-                { label: 'Vista Cliente',      href: '/menu' },
+                { label: 'Cocina', href: '/cocina' },
+                { label: 'Cajero', href: '/cajero' },
+                { label: 'Productos', href: '/admin/menu' },
+                { label: 'Mesero', href: '/mesero' },
+                { label: 'Reportes', href: '/admin/reports' },
+                { label: 'Empleados', href: '/admin/employees' },
+                { label: 'Gestionar Recetas', href: '/admin/recipes' },
+                { label: 'Ingredientes', href: '/admin/ingredients' },
+                { label: 'Inv. Ingredientes', href: '/admin/inventory-report' },
+                { label: 'Vista Cliente', href: '/menu' },
               ].map((l) => (
                 <a
                   key={l.href}
@@ -454,20 +498,20 @@ export default function AdminPage() {
                         </p>
                       )}
                       {orden.tipo_servicio === 'domicilio' && orden.direccion_entrega && (
-                        <p className="text-gray-500 text-xs mb-1">
-                          {orden.direccion_entrega}
-                        </p>
+                        <p className="text-gray-500 text-xs mb-1">{orden.direccion_entrega}</p>
                       )}
                       <div className="flex items-center justify-between mt-2">
-                        <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
+                        <span className="text-gray-500 text-xs">
+                          {formatFecha(orden.creado_en)}
+                        </span>
                         <span className="font-extrabold text-base" style={{ color: '#F28500' }}>
                           ${parseFloat(orden.total).toFixed(2)}
                         </span>
                       </div>
                       {/* Botones de cambio de estado */}
-                      {(TRANSICIONES[orden.estado] ?? []).length > 0 && (
+                      {getTransicionesOrden(orden).length > 0 && (
                         <div className="flex gap-2 mt-3">
-                          {(TRANSICIONES[orden.estado] ?? []).map((t) => (
+                          {getTransicionesOrden(orden).map((t) => (
                             <button
                               key={t.estado}
                               onClick={() => cambiarEstado(orden.id, t.estado)}
@@ -489,11 +533,21 @@ export default function AdminPage() {
                         <button
                           onClick={() => enviarRepartidorWhatsApp(orden)}
                           className="mt-3 w-full py-2 rounded-xl text-sm font-extrabold transition active:scale-95 flex items-center justify-center gap-2"
-                          style={{ background: 'rgba(37,211,102,0.12)', color: '#25D366', border: '1px solid rgba(37,211,102,0.25)' }}
+                          style={{
+                            background: 'rgba(37,211,102,0.12)',
+                            color: '#25D366',
+                            border: '1px solid rgba(37,211,102,0.25)',
+                          }}
                         >
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                            <path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.99.583 3.842 1.585 5.396L2 22l4.73-1.558A9.943 9.943 0 0011.999 22C17.522 22 22 17.523 22 12c0-5.522-4.478-10-10.001-10zm0 18.182a8.14 8.14 0 01-4.142-1.13l-.297-.176-3.08 1.014.986-3.006-.193-.309A8.14 8.14 0 013.818 12c0-4.517 3.663-8.182 8.181-8.182C16.518 3.818 20.182 7.483 20.182 12c0 4.518-3.664 8.182-8.183 8.182z"/>
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            aria-hidden="true"
+                          >
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                            <path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.99.583 3.842 1.585 5.396L2 22l4.73-1.558A9.943 9.943 0 0011.999 22C17.522 22 22 17.523 22 12c0-5.522-4.478-10-10.001-10zm0 18.182a8.14 8.14 0 01-4.142-1.13l-.297-.176-3.08 1.014.986-3.006-.193-.309A8.14 8.14 0 013.818 12c0-4.517 3.663-8.182 8.181-8.182C16.518 3.818 20.182 7.483 20.182 12c0 4.518-3.664 8.182-8.183 8.182z" />
                           </svg>
                           Enviar a repartidor por WhatsApp
                         </button>
