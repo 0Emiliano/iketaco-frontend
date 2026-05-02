@@ -23,6 +23,19 @@ interface Servicio {
   fecha_fin: string | null
 }
 
+interface OrdenDetalle {
+  id: number
+  cantidad: number
+  precio_unitario: string
+  notas_item: string | null
+  productos: { id: number; nombre: string }
+}
+interface OrdenCombo {
+  id: number
+  cantidad: number
+  precio_unitario: string
+  combos: { id: number; nombre: string }
+}
 interface Orden {
   id: number
   numero: string
@@ -35,9 +48,27 @@ interface Orden {
   longitud_entrega: number | string | null
   subtotal: string
   total: string
+  notas_orden: string | null
   creado_en: string
-  orden_detalles?: { id: number; cantidad: number; productos: { nombre: string } }[]
-  orden_combos?: { id: number; cantidad: number; combos: { nombre: string } }[]
+  orden_detalles?: OrdenDetalle[]
+  orden_combos?: OrdenCombo[]
+}
+
+interface MenuProducto { id: number; nombre: string; precio_base: string }
+interface MenuCombo    { id: number; nombre: string; precio: string }
+
+interface EditDetalle {
+  productoId: number; nombre: string; cantidad: number; precioUnit: number; notas: string
+}
+interface EditCombo {
+  comboId: number; nombre: string; cantidad: number; precioUnit: number
+}
+
+const TIPO_LABEL: Record<string, string> = {
+  mostrador:   'Mostrador',
+  mesa:        'Mesa',
+  para_llevar: 'Para llevar',
+  domicilio:   'Domicilio',
 }
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -137,6 +168,19 @@ export default function AdminPage() {
   const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null)
   const [usuario, setUsuario] = useState<{ email: string; rol: string } | null>(null)
 
+  // ── Order detail panel ──────────────────────────────────────────────────────
+  const [panelOrden, setPanelOrden] = useState<Orden | null>(null)
+  const [editDetalles, setEditDetalles] = useState<EditDetalle[]>([])
+  const [editCombos, setEditCombos]     = useState<EditCombo[]>([])
+  const [savingItems, setSavingItems]   = useState(false)
+  const [itemsError, setItemsError]     = useState('')
+  const [menuProductos, setMenuProductos] = useState<MenuProducto[]>([])
+  const [menuCombos, setMenuCombos]       = useState<MenuCombo[]>([])
+  const [addTipo, setAddTipo]     = useState<'producto' | 'combo'>('producto')
+  const [addId, setAddId]         = useState<number | ''>('')
+  const [addCantidad, setAddCantidad] = useState(1)
+  const [showAdd, setShowAdd]     = useState(false)
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const raw = localStorage.getItem('usuario')
@@ -221,6 +265,115 @@ export default function AdminPage() {
     } finally {
       setCambiandoEstado(null)
     }
+  }
+
+  const abrirDetalle = async (orden: Orden) => {
+    setPanelOrden(orden)
+    setItemsError('')
+    setShowAdd(false)
+    setAddId('')
+    setAddCantidad(1)
+    setEditDetalles(
+      (orden.orden_detalles ?? []).map((d) => ({
+        productoId: d.productos.id,
+        nombre:     d.productos.nombre,
+        cantidad:   d.cantidad,
+        precioUnit: parseFloat(d.precio_unitario),
+        notas:      d.notas_item ?? '',
+      }))
+    )
+    setEditCombos(
+      (orden.orden_combos ?? []).map((c) => ({
+        comboId:   c.combos.id,
+        nombre:    c.combos.nombre,
+        cantidad:  c.cantidad,
+        precioUnit: parseFloat(c.precio_unitario),
+      }))
+    )
+    // Lazy-load menu only once
+    if (menuProductos.length === 0) {
+      try {
+        const [rp, rc] = await Promise.all([
+          apiClient.get('/menu/productos'),
+          apiClient.get('/menu/combos'),
+        ])
+        setMenuProductos(rp.data ?? [])
+        setMenuCombos(rc.data ?? [])
+      } catch { /* ignore */ }
+    }
+  }
+
+  const cerrarDetalle = () => {
+    setPanelOrden(null)
+    setShowAdd(false)
+  }
+
+  const canEdit = (orden: Orden) =>
+    ['pendiente', 'en_preparacion'].includes(orden.estado)
+
+  const guardarItems = async () => {
+    if (!panelOrden) return
+    setSavingItems(true)
+    setItemsError('')
+    try {
+      const body: {
+        productos?: { productoId: number; cantidad: number; notas?: string }[]
+        combos?:    { comboId: number; cantidad: number }[]
+      } = {}
+      if (editDetalles.length > 0)
+        body.productos = editDetalles.map((d) => ({
+          productoId: d.productoId, cantidad: d.cantidad, notas: d.notas || undefined,
+        }))
+      if (editCombos.length > 0)
+        body.combos = editCombos.map((c) => ({ comboId: c.comboId, cantidad: c.cantidad }))
+      await apiClient.patch(`/orders/${panelOrden.id}/items`, body)
+      await fetchOrdenes()
+      // Update panelOrden with fresh data
+      const res = await apiClient.get(`/orders/${panelOrden.id}`)
+      setPanelOrden(res.data)
+    } catch (err: any) {
+      setItemsError(err?.response?.data?.error ?? 'Error al guardar cambios')
+    } finally {
+      setSavingItems(false)
+    }
+  }
+
+  const agregarItem = () => {
+    if (!addId || addCantidad < 1) return
+    if (addTipo === 'producto') {
+      const prod = menuProductos.find((p) => p.id === addId)
+      if (!prod) return
+      const existe = editDetalles.find((d) => d.productoId === addId)
+      if (existe) {
+        setEditDetalles((prev) =>
+          prev.map((d) => d.productoId === addId ? { ...d, cantidad: d.cantidad + addCantidad } : d)
+        )
+      } else {
+        setEditDetalles((prev) => [
+          ...prev,
+          { productoId: prod.id, nombre: prod.nombre, cantidad: addCantidad,
+            precioUnit: parseFloat(prod.precio_base), notas: '' },
+        ])
+      }
+    } else {
+      const combo = menuCombos.find((c) => c.id === addId)
+      if (!combo) return
+      const existe = editCombos.find((c) => c.comboId === addId)
+      if (existe) {
+        setEditCombos((prev) =>
+          prev.map((c) => c.comboId === addId ? { ...c, cantidad: c.cantidad + addCantidad } : c)
+        )
+      } else {
+        setEditCombos((prev) => [
+          ...prev,
+          { comboId: combo.id, nombre: combo.nombre, cantidad: addCantidad,
+            precioUnit: parseFloat(combo.precio) },
+        ])
+      }
+    }
+    setAddId('')
+    setAddCantidad(1)
+    setShowAdd(false)
   }
 
   const logout = () => {
@@ -559,20 +712,52 @@ export default function AdminPage() {
                       className="rounded-2xl p-4"
                       style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
                     >
+                      {/* Row: número + estado + detalle */}
                       <div className="flex items-center justify-between mb-2">
-                        <span
-                          className="text-xs font-black px-2 py-1 rounded-lg"
-                          style={{ background: '#F28500', color: 'white' }}
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-xs font-black px-2 py-1 rounded-lg"
+                            style={{ background: '#F28500', color: 'white' }}
+                          >
+                            {orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}
+                          </span>
+                          <span
+                            className="text-xs font-bold px-2 py-1 rounded-full"
+                            style={{ background: cfg.bg, color: cfg.color }}
+                          >
+                            {cfg.label}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => abrirDetalle(orden)}
+                          className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
+                          style={{ background: 'rgba(255,255,255,0.07)', color: '#9CA3AF' }}
+                          title="Ver / editar productos"
                         >
-                          {orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}
-                        </span>
-                        <span
-                          className="text-xs font-bold px-2 py-1 rounded-full"
-                          style={{ background: cfg.bg, color: cfg.color }}
-                        >
-                          {cfg.label}
-                        </span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                          </svg>
+                        </button>
                       </div>
+
+                      {/* Items preview */}
+                      {((orden.orden_detalles?.length ?? 0) + (orden.orden_combos?.length ?? 0)) > 0 && (
+                        <div className="mb-2 flex flex-col gap-0.5">
+                          {(orden.orden_detalles ?? []).map((d) => (
+                            <p key={d.id} className="text-gray-400 text-xs">
+                              <span className="text-white font-bold">{d.cantidad}×</span>{' '}
+                              {d.productos.nombre}
+                            </p>
+                          ))}
+                          {(orden.orden_combos ?? []).map((c) => (
+                            <p key={c.id} className="text-gray-400 text-xs">
+                              <span className="text-white font-bold">{c.cantidad}×</span>{' '}
+                              {c.combos.nombre}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+
                       {orden.nombre_cliente && (
                         <p className="text-gray-300 text-sm font-semibold mb-1">
                           {orden.nombre_cliente}
@@ -641,6 +826,273 @@ export default function AdminPage() {
           </div>
         )}
       </main>
+
+      {/* ── ORDER DETAIL PANEL ─────────────────────────────────────────────── */}
+      {panelOrden && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          {/* backdrop */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+            onClick={cerrarDetalle}
+          />
+
+          {/* panel */}
+          <div
+            className="relative w-full max-w-md flex flex-col overflow-hidden"
+            style={{ background: '#141414', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <div>
+                <p className="text-xs text-orange-400 font-bold uppercase tracking-wider">
+                  {TIPO_LABEL[panelOrden.tipo_servicio ?? ''] ?? panelOrden.tipo_servicio ?? '—'}
+                </p>
+                <h2 className="text-white font-extrabold text-base">
+                  {panelOrden.numero.replace(/ORD-\d{8}-/, 'ORD-')}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-xs font-bold px-2 py-1 rounded-full"
+                  style={{
+                    background: (ESTADO_CONFIG[panelOrden.estado] ?? ESTADO_CONFIG['pendiente']).bg,
+                    color:      (ESTADO_CONFIG[panelOrden.estado] ?? ESTADO_CONFIG['pendiente']).color,
+                  }}
+                >
+                  {(ESTADO_CONFIG[panelOrden.estado] ?? ESTADO_CONFIG['pendiente']).label}
+                </span>
+                <button
+                  onClick={cerrarDetalle}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition"
+                  style={{ background: 'rgba(255,255,255,0.06)' }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5">
+
+              {/* Client info */}
+              {(panelOrden.nombre_cliente || panelOrden.direccion_entrega || panelOrden.notas_orden) && (
+                <div className="rounded-xl p-3 flex flex-col gap-1" style={{ background: '#1A1A1A' }}>
+                  {panelOrden.nombre_cliente && (
+                    <p className="text-white text-sm font-bold">{panelOrden.nombre_cliente}</p>
+                  )}
+                  {panelOrden.direccion_entrega && (
+                    <p className="text-gray-400 text-xs">{panelOrden.direccion_entrega}</p>
+                  )}
+                  {panelOrden.notas_orden && (
+                    <p className="text-yellow-400 text-xs mt-1">Nota: {panelOrden.notas_orden}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Items */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-white font-extrabold text-sm">Productos</p>
+                  {canEdit(panelOrden) && (
+                    <button
+                      onClick={() => setShowAdd((v) => !v)}
+                      className="text-xs font-bold px-2.5 py-1 rounded-lg transition"
+                      style={{ background: 'rgba(242,133,0,0.15)', color: '#F28500' }}
+                    >
+                      {showAdd ? 'Cancelar' : '＋ Agregar'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Add item form */}
+                {showAdd && canEdit(panelOrden) && (
+                  <div
+                    className="rounded-xl p-3 mb-3 flex flex-col gap-2"
+                    style={{ background: 'rgba(242,133,0,0.06)', border: '1px solid rgba(242,133,0,0.2)' }}
+                  >
+                    <div className="flex gap-2">
+                      {(['producto', 'combo'] as const).map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => { setAddTipo(t); setAddId('') }}
+                          className="flex-1 py-1.5 rounded-lg text-xs font-bold transition"
+                          style={{
+                            background: addTipo === t ? '#F28500' : 'rgba(255,255,255,0.06)',
+                            color: addTipo === t ? 'white' : '#9CA3AF',
+                          }}
+                        >
+                          {t === 'producto' ? 'Producto' : 'Combo'}
+                        </button>
+                      ))}
+                    </div>
+                    <select
+                      value={addId}
+                      onChange={(e) => setAddId(e.target.value ? Number(e.target.value) : '')}
+                      className="w-full rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
+                      style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)' }}
+                    >
+                      <option value="">Selecciona {addTipo === 'producto' ? 'un producto' : 'un combo'}…</option>
+                      {(addTipo === 'producto' ? menuProductos : menuCombos).map((item) => (
+                        <option key={item.id} value={item.id}>{item.nombre}</option>
+                      ))}
+                    </select>
+                    <div className="flex gap-2">
+                      <input
+                        type="number" min={1} value={addCantidad}
+                        onChange={(e) => setAddCantidad(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-20 rounded-lg px-3 py-2 text-sm text-white text-center focus:outline-none"
+                        style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)' }}
+                      />
+                      <button
+                        onClick={agregarItem}
+                        disabled={!addId}
+                        className="flex-1 py-2 rounded-lg text-sm font-extrabold text-white transition active:scale-95 disabled:opacity-40"
+                        style={{ background: 'linear-gradient(135deg,#F28500,#D4700A)' }}
+                      >
+                        Agregar
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Detalles (productos) */}
+                <div className="flex flex-col gap-2">
+                  {editDetalles.length === 0 && editCombos.length === 0 && (
+                    <p className="text-gray-500 text-sm text-center py-4">Sin productos</p>
+                  )}
+                  {editDetalles.map((d) => (
+                    <div
+                      key={d.productoId}
+                      className="rounded-xl px-3 py-2.5 flex items-center gap-3"
+                      style={{ background: '#1A1A1A' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-semibold truncate">{d.nombre}</p>
+                        <p className="text-gray-500 text-xs">${d.precioUnit.toFixed(2)} c/u</p>
+                      </div>
+                      {canEdit(panelOrden) ? (
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            onClick={() =>
+                              setEditDetalles((prev) =>
+                                d.cantidad <= 1
+                                  ? prev.filter((x) => x.productoId !== d.productoId)
+                                  : prev.map((x) => x.productoId === d.productoId ? { ...x, cantidad: x.cantidad - 1 } : x)
+                              )
+                            }
+                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold transition"
+                            style={{ background: 'rgba(231,76,60,0.15)', color: '#E74C3C' }}
+                          >
+                            {d.cantidad <= 1 ? '✕' : '−'}
+                          </button>
+                          <span className="text-white font-extrabold text-sm w-5 text-center">{d.cantidad}</span>
+                          <button
+                            onClick={() =>
+                              setEditDetalles((prev) =>
+                                prev.map((x) => x.productoId === d.productoId ? { ...x, cantidad: x.cantidad + 1 } : x)
+                              )
+                            }
+                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold transition"
+                            style={{ background: 'rgba(39,174,96,0.15)', color: '#27AE60' }}
+                          >
+                            ＋
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-white font-extrabold text-sm flex-shrink-0">{d.cantidad}×</span>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Combos */}
+                  {editCombos.map((c) => (
+                    <div
+                      key={c.comboId}
+                      className="rounded-xl px-3 py-2.5 flex items-center gap-3"
+                      style={{ background: '#1A1A1A' }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background: 'rgba(242,133,0,0.15)', color: '#F28500' }}>Combo</span>
+                          <p className="text-white text-sm font-semibold truncate">{c.nombre}</p>
+                        </div>
+                        <p className="text-gray-500 text-xs">${c.precioUnit.toFixed(2)} c/u</p>
+                      </div>
+                      {canEdit(panelOrden) ? (
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          <button
+                            onClick={() =>
+                              setEditCombos((prev) =>
+                                c.cantidad <= 1
+                                  ? prev.filter((x) => x.comboId !== c.comboId)
+                                  : prev.map((x) => x.comboId === c.comboId ? { ...x, cantidad: x.cantidad - 1 } : x)
+                              )
+                            }
+                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold transition"
+                            style={{ background: 'rgba(231,76,60,0.15)', color: '#E74C3C' }}
+                          >
+                            {c.cantidad <= 1 ? '✕' : '−'}
+                          </button>
+                          <span className="text-white font-extrabold text-sm w-5 text-center">{c.cantidad}</span>
+                          <button
+                            onClick={() =>
+                              setEditCombos((prev) =>
+                                prev.map((x) => x.comboId === c.comboId ? { ...x, cantidad: x.cantidad + 1 } : x)
+                              )
+                            }
+                            className="w-7 h-7 rounded-lg flex items-center justify-center font-bold transition"
+                            style={{ background: 'rgba(39,174,96,0.15)', color: '#27AE60' }}
+                          >
+                            ＋
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-white font-extrabold text-sm flex-shrink-0">{c.cantidad}×</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Total */}
+              <div
+                className="rounded-xl px-4 py-3 flex items-center justify-between"
+                style={{ background: '#1A1A1A' }}
+              >
+                <p className="text-gray-400 text-sm font-semibold">Total</p>
+                <p className="text-white font-extrabold text-lg" style={{ color: '#F28500' }}>
+                  ${parseFloat(panelOrden.total).toFixed(2)}
+                </p>
+              </div>
+
+              {itemsError && (
+                <p className="text-red-400 text-xs font-bold text-center">{itemsError}</p>
+              )}
+            </div>
+
+            {/* Footer */}
+            {canEdit(panelOrden) && (
+              <div
+                className="flex-shrink-0 px-4 py-3"
+                style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                <button
+                  onClick={guardarItems}
+                  disabled={savingItems}
+                  className="w-full py-3 rounded-2xl text-white font-extrabold text-sm transition active:scale-95 disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg,#F28500,#D4700A)' }}
+                >
+                  {savingItems ? 'Guardando…' : 'Guardar cambios'}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
