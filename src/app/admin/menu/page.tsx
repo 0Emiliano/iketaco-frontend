@@ -78,7 +78,7 @@ export default function AdminMenuPage() {
     setFetchError('')
     try {
       const [prodsRes, catsRes] = await Promise.all([
-        apiClient.get('/menu/productos'),
+        apiClient.get('/admin/menu/products'),
         apiClient.get('/menu/categorias'),
       ])
       setProductos(prodsRes.data)
@@ -233,6 +233,28 @@ export default function AdminMenuPage() {
     }
   }
 
+  // ─── Activar / desactivar rápido ────────────────────────────────────────────
+  const [toggling, setToggling] = useState(false)
+
+  const toggleDisponible = async () => {
+    if (!seleccionado) return
+    setToggling(true)
+    try {
+      const res = await apiClient.patch(`/admin/menu/productos/${seleccionado.id}`, {
+        disponible: !seleccionado.disponible,
+      })
+      const actualizado: Producto = res.data
+      setProductos((prev) => prev.map((p) => (p.id === actualizado.id ? actualizado : p)))
+      setSeleccionado(actualizado)
+      setForm((prev) => ({ ...prev, disponible: actualizado.disponible }))
+      toast(actualizado.disponible ? 'Producto activado' : 'Producto desactivado')
+    } catch (err: any) {
+      toast(err?.response?.data?.error ?? 'Error al cambiar disponibilidad', 'error')
+    } finally {
+      setToggling(false)
+    }
+  }
+
   // ─── Lista filtrada ──────────────────────────────────────────────────────────
   const productosFiltrados = productos.filter((p) =>
     p.nombre.toLowerCase().includes(search.toLowerCase())
@@ -331,16 +353,17 @@ export default function AdminMenuPage() {
                         style={{
                           background: activo ? 'rgba(242,133,0,0.12)' : '#1A1A1A',
                           border: `1px solid ${activo ? 'rgba(242,133,0,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                          opacity: producto.disponible ? 1 : 0.5,
                         }}
                       >
                         {/* Imagen miniatura */}
                         <div
-                          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl overflow-hidden"
+                          className="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden"
                           style={{ background: '#2A2A2A' }}
                         >
-                          {producto.imagen_url ? (
-                            <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
-                          ) : null}
+                          {producto.imagen_url
+                            ? <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+                            : null}
                         </div>
 
                         {/* Info */}
@@ -349,14 +372,18 @@ export default function AdminMenuPage() {
                           <p className="text-gray-400 text-xs">{producto.categorias.nombre}</p>
                         </div>
 
-                        {/* Precio + estado */}
-                        <div className="text-right flex-shrink-0">
+                        {/* Precio + badge disponible */}
+                        <div className="text-right flex-shrink-0 flex flex-col items-end gap-1">
                           <p className="font-extrabold text-sm" style={{ color: '#F28500' }}>
                             ${parseFloat(producto.precio_base).toFixed(2)}
                           </p>
                           <span
-                            className="text-xs font-bold"
-                            style={{ color: producto.disponible ? '#27AE60' : '#9CA3AF' }}
+                            className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                            style={
+                              producto.disponible
+                                ? { background: 'rgba(39,174,96,0.15)', color: '#27AE60' }
+                                : { background: 'rgba(156,163,175,0.15)', color: '#9CA3AF' }
+                            }
                           >
                             {producto.disponible ? 'Activo' : 'Inactivo'}
                           </span>
@@ -364,10 +391,7 @@ export default function AdminMenuPage() {
 
                         {/* Chevron */}
                         <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
+                          width="14" height="14" viewBox="0 0 24 24" fill="none"
                           className="text-gray-600 flex-shrink-0 transition-transform duration-200"
                           style={{ transform: activo ? 'rotate(90deg)' : 'rotate(0)' }}
                         >
@@ -632,6 +656,26 @@ export default function AdminMenuPage() {
                       'Guardar cambios'
                     )}
                   </button>
+
+                  {/* Botón activar / desactivar — solo en edición */}
+                  {modo === 'editar' && seleccionado && (
+                    <button
+                      onClick={toggleDisponible}
+                      disabled={toggling}
+                      className="w-full mt-2 py-3 rounded-2xl font-extrabold text-sm transition-all active:scale-95 disabled:opacity-50"
+                      style={
+                        seleccionado.disponible
+                          ? { background: 'rgba(231,76,60,0.12)', color: '#E74C3C', border: '1px solid rgba(231,76,60,0.3)' }
+                          : { background: 'rgba(39,174,96,0.12)', color: '#27AE60', border: '1px solid rgba(39,174,96,0.3)' }
+                      }
+                    >
+                      {toggling
+                        ? 'Actualizando...'
+                        : seleccionado.disponible
+                        ? 'Desactivar producto'
+                        : 'Activar producto'}
+                    </button>
+                  )}
                 </section>
               </div>
             )}
