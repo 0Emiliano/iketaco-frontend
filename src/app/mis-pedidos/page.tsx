@@ -298,12 +298,11 @@ export default function MisPedidosPage() {
     apiClient
       .get('/orders/mis-pedidos', { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => setOrdenes(res.data?.items ?? []))
-      .catch((err) => {
-        if (err?.response?.status === 401) router.push('/login')
-        else setError('Error al cargar tus pedidos')
+      .catch(() => {
+        setError('Error al cargar tus pedidos')
       })
       .finally(() => setLoading(false))
-  }, [router])
+  }, [])
 
   useEffect(() => { fetchOrdenes() }, [fetchOrdenes])
 

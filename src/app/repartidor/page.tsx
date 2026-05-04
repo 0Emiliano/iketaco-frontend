@@ -292,13 +292,12 @@ export default function RepartidorPage() {
         headers: { Authorization: `Bearer ${token}` },
       })
       setEntregas(Array.isArray(res.data) ? res.data : res.data?.items ?? [])
-    } catch (err: any) {
-      if (err?.response?.status === 401) router.push('/login')
-      else setFetchError('Error al cargar las entregas. Verifica tu conexión.')
+    } catch {
+      setFetchError('Error al cargar las entregas. Verifica tu conexión.')
     } finally {
       setLoading(false)
     }
-  }, [token, router])
+  }, [token])
 
   useEffect(() => {
     if (token) {

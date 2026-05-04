@@ -377,8 +377,11 @@ export default function CocinaPage() {
       setOrdenes(activas)
       setError('')
     } catch (err: any) {
-      if (err?.response?.status === 401) router.push('/login')
-      else setError('No se pudieron cargar las comandas. Verifica tu conexión.')
+      if (err?.response?.status === 403) {
+        router.push('/login')
+      } else {
+        setError('No se pudieron cargar las comandas. Verifica tu conexión.')
+      }
     } finally {
       setLoading(false)
     }
@@ -398,8 +401,14 @@ export default function CocinaPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       fetchOrdenes()
-    } catch {
-      setError('Error al actualizar el estado')
+    } catch (err: any) {
+      if (err?.response?.status === 403) {
+        setError('No tienes permisos para realizar esta acción')
+      } else if (!err?.response) {
+        setError('Sin conexión con el servidor. Verifica tu internet.')
+      } else {
+        setError(err?.response?.data?.error ?? 'Error al actualizar el estado')
+      }
     }
   }
 
