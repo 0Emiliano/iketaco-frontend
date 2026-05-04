@@ -5,167 +5,257 @@ import { useRouter } from 'next/navigation'
 import { FormEvent, useState } from 'react'
 import apiClient from '@/lib/api/client'
 
+// ─── Eye icon ─────────────────────────────────────────────────────────────────
+function EyeIcon({ open }: { open: boolean }) {
+  return open ? (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+      <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  ) : (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
+// ─── Spinner ──────────────────────────────────────────────────────────────────
+function Spinner() {
+  return (
+    <svg className="animate-spin-smooth" width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3" />
+      <path d="M12 2a10 10 0 0110 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+const REDIRECT: Record<string, string> = {
+  gerente: '/admin', cajero: '/cajero', cocinero: '/cocina',
+  mesero: '/mesero', repartidor: '/entregas',
+}
+
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+
 export default function LoginPage() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  const [email, setEmail]           = useState('')
+  const [password, setPassword]     = useState('')
+  const [showPwd, setShowPwd]       = useState(false)
+  const [loading, setLoading]       = useState(false)
+  const [success, setSuccess]       = useState(false)
+  const [error, setError]           = useState('')
+  const [shakeKey, setShakeKey]     = useState(0)
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  // field-level errors
+  const [emailErr, setEmailErr]     = useState('')
+  const [pwdErr, setPwdErr]         = useState('')
+
+  const triggerShake = (msg: string) => {
+    setError(msg)
+    setShakeKey((k) => k + 1)
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
     setError('')
-    setSuccessMessage('')
+    setEmailErr('')
+    setPwdErr('')
 
-    if (!isValidEmail(email)) {
-      setError('Ingresa un correo electrónico válido.')
-      return
-    }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.')
-      return
-    }
+    let hasErr = false
+    if (!isValidEmail(email)) { setEmailErr('Correo inválido'); hasErr = true }
+    if (password.length < 6)  { setPwdErr('Mínimo 6 caracteres'); hasErr = true }
+    if (hasErr) { setShakeKey((k) => k + 1); return }
 
     setLoading(true)
-
     try {
-      const response = await apiClient.post('/auth/login', {
-        email,
-        password,
-      })
-
-      const { accessToken, usuario } = response.data
-
+      const { data } = await apiClient.post('/auth/login', { email, password })
+      const { accessToken, usuario } = data
       localStorage.setItem('accessToken', accessToken)
       localStorage.setItem('usuario', JSON.stringify(usuario))
-
-      setSuccessMessage('¡Sesión iniciada correctamente! Redirigiendo...')
-      setTimeout(() => {
-        switch (usuario.rol) {
-          case 'gerente':
-            router.push('/admin')
-            break
-          case 'cajero':
-            router.push('/cajero')
-            break
-          case 'cocinero':
-            router.push('/cocina')
-            break
-          case 'mesero':
-            router.push('/mesero')
-            break
-          case 'repartidor':
-            router.push('/entregas')
-            break
-          default:
-            router.push('/menu')
-        }
-      }, 500)
+      setSuccess(true)
+      setTimeout(() => router.push(REDIRECT[usuario.rol] ?? '/menu'), 900)
     } catch (err: any) {
-      console.error(err)
-      const serverMessage = err?.response?.data?.message || err?.response?.data?.error
-      if (serverMessage) {
-        setError(String(serverMessage))
-      } else if (err?.response?.status === 401) {
-        setError('Credenciales incorrectas. Revisa tu correo y contraseña.')
-      } else {
-        setError('No se pudo iniciar sesión. Revisa tus credenciales e intenta de nuevo.')
-      }
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        (err?.response?.status === 401
+          ? 'Credenciales incorrectas.'
+          : 'No se pudo iniciar sesión. Intenta de nuevo.')
+      triggerShake(String(msg))
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col">
-      <header className="px-4 py-4 border-b border-white/10">
-        <div className="max-w-lg mx-auto">
-          <Link href="/" className="text-xs text-white/70 hover:text-white transition">
-            ← Volver a inicio
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-4 py-12">
 
-      <main className="flex-1 px-4 py-8 max-w-lg mx-auto w-full">
-        <div className="bg-[#131313] border border-white/10 rounded-3xl p-5 shadow-card">
-          <div className="mb-6">
-            <p className="text-xs uppercase tracking-[0.2em] text-orange-400 font-bold">Cuenta</p>
-            <h1 className="text-3xl font-display mt-2 text-white">Inicia sesión</h1>
-            <p className="mt-2 text-sm text-slate-300">
-              Accede a tu cuenta para continuar con tu pedido.
-            </p>
+      {/* Ambient glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(242,133,0,0.08) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Back link */}
+      <div className="w-full max-w-sm mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5M5 12l7 7M5 12l7-7" />
+          </svg>
+          Volver al inicio
+        </Link>
+      </div>
+
+      {/* Card */}
+      <div
+        className="w-full max-w-sm rounded-3xl p-7 relative overflow-hidden"
+        style={{
+          background: '#131313',
+          border: '1px solid rgba(255,255,255,0.07)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03)',
+        }}
+      >
+        {/* Top accent line */}
+        <div
+          className="absolute top-0 left-8 right-8 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(242,133,0,0.5), transparent)' }}
+        />
+
+        {/* Header */}
+        <div className="mb-7">
+          <p className="text-xs uppercase tracking-[0.22em] font-bold" style={{ color: '#F28500' }}>
+            Bienvenido
+          </p>
+          <h1 className="font-display text-4xl text-white mt-1">Inicia sesión</h1>
+          <p className="text-gray-500 text-sm mt-2">Accede a tu cuenta para continuar.</p>
+        </div>
+
+        {/* Success overlay */}
+        {success && (
+          <div
+            className="animate-success-pop absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl"
+            style={{ background: '#131313' }}
+          >
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(39,174,96,0.15)', border: '1px solid rgba(39,174,96,0.3)' }}
+            >
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#27AE60" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <p className="text-white font-extrabold text-lg">Sesión iniciada</p>
+            <p className="text-gray-400 text-sm">Redirigiendo...</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          {/* Email */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5" htmlFor="email">
+              Correo electrónico
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setEmailErr('') }}
+              placeholder="tunombre@correo.com"
+              className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none transition-all duration-200"
+              style={{
+                background: '#0C0C0C',
+                border: `1px solid ${emailErr ? 'rgba(231,76,60,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                boxShadow: emailErr ? '0 0 0 3px rgba(231,76,60,0.08)' : undefined,
+              }}
+            />
+            {emailErr && (
+              <p className="text-red-400 text-xs mt-1 font-medium">{emailErr}</p>
+            )}
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1" htmlFor="email">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                type="email"
-                required
-                className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
-                placeholder="tunombre@correo.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1" htmlFor="password">
-                Contraseña
-              </label>
+          {/* Password */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5" htmlFor="password">
+              Contraseña
+            </label>
+            <div className="relative">
               <input
                 id="password"
+                type={showPwd ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                type={showPassword ? 'text' : 'password'}
-                required
-                className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
+                onChange={(e) => { setPassword(e.target.value); setPwdErr('') }}
                 placeholder="••••••••"
+                className="w-full rounded-xl px-4 py-3 pr-11 text-sm text-white placeholder-gray-600 focus:outline-none transition-all duration-200"
+                style={{
+                  background: '#0C0C0C',
+                  border: `1px solid ${pwdErr ? 'rgba(231,76,60,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                  boxShadow: pwdErr ? '0 0 0 3px rgba(231,76,60,0.08)' : undefined,
+                }}
               />
               <button
                 type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="mt-1 text-xs text-orange-300 hover:text-orange-100 font-semibold"
+                onClick={() => setShowPwd((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                aria-label={showPwd ? 'Ocultar contraseña' : 'Ver contraseña'}
               >
-                {showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+                <EyeIcon open={showPwd} />
               </button>
-              <div className="mt-1 text-right">
-                <Link href="/forgot-password" className="text-xs text-slate-400 hover:text-orange-300 transition">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
             </div>
-
-            {error && <p className="text-xs text-red-300">{error}</p>}
-            {successMessage && <p className="text-xs text-emerald-300">{successMessage}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-[#F28500] via-[#E68510] to-[#D4700A] py-3 text-sm font-bold uppercase tracking-wide text-white shadow-btn transition hover:opacity-95 disabled:opacity-50"
-            >
-              {loading ? 'Iniciando...' : 'Iniciar sesión'}
-            </button>
-          </form>
-
-          <div className="mt-4 text-center text-xs text-slate-300">
-            ¿Aún no tienes cuenta?{' '}
-            <Link href="/register" className="text-orange-300 font-semibold hover:text-orange-100">
-              Regístrate
-            </Link>
+            {pwdErr && <p className="text-red-400 text-xs mt-1 font-medium">{pwdErr}</p>}
+            <div className="mt-1.5 text-right">
+              <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className="mt-4 text-center text-slate-300 text-xs">
-          <p className="text-white/70">Inicio de sesión.</p>
-        </div>
-      </main>
+          {/* Error banner */}
+          {error && (
+            <div
+              key={shakeKey}
+              className="animate-shake flex items-center gap-2.5 rounded-xl px-4 py-3"
+              style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.25)' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <p className="text-red-400 text-xs font-semibold">{error}</p>
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || success}
+            className="w-full py-3.5 rounded-xl font-extrabold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-60"
+            style={{
+              background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
+              boxShadow: '0 4px 20px rgba(242,133,0,0.35)',
+            }}
+          >
+            {loading ? <><Spinner /> Iniciando sesión…</> : 'Iniciar sesión'}
+          </button>
+        </form>
+
+        {/* Footer link */}
+        <p className="mt-5 text-center text-xs text-gray-500">
+          ¿Aún no tienes cuenta?{' '}
+          <Link href="/register" className="font-bold hover:text-orange-400 transition-colors" style={{ color: '#F28500' }}>
+            Regístrate gratis
+          </Link>
+        </p>
+      </div>
     </div>
   )
 }
