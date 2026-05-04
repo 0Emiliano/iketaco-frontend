@@ -30,6 +30,7 @@ function TransferenciaContent() {
   const total   = searchParams.get('total')
   const pagoId  = searchParams.get('pagoId')
 
+  const resubir  = searchParams.get('resubir') === 'true'
   const fmtTotal = total ? `$${parseFloat(total).toFixed(2)}` : '—'
 
   // Copy CLABE
@@ -81,16 +82,32 @@ function TransferenciaContent() {
   }
 
   const handleUpload = async () => {
-    if (!file || !pagoId) return
+    if (!file) return
     const token = localStorage.getItem('accessToken')
     if (!token) { router.push('/login'); return }
 
     setUploading(true)
     setUploadError('')
     try {
+      // Si resubiendo sin pagoId: crear un nuevo pago de transferencia primero
+      let efectivoPagoId = pagoId
+      if (!efectivoPagoId && resubir && ordenId && total) {
+        const payRes = await apiClient.post(
+          '/payments',
+          { ordenId: parseInt(ordenId), metodoPagoId: 3, monto: parseFloat(total) },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        efectivoPagoId = String(payRes.data.pago.id)
+      }
+
+      if (!efectivoPagoId) {
+        setUploadError('No se encontró el ID de pago. Regresa al carrito e intenta de nuevo.')
+        return
+      }
+
       const formData = new FormData()
       formData.append('comprobante', file)
-      await apiClient.post(`/payments/${pagoId}/comprobante`, formData, {
+      await apiClient.post(`/payments/${efectivoPagoId}/comprobante`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -107,6 +124,24 @@ function TransferenciaContent() {
 
   return (
     <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full flex flex-col gap-4 mt-2">
+
+      {/* ── Banner de rechazo ── */}
+      {resubir && (
+        <div
+          className="rounded-2xl px-4 py-3 flex items-start gap-3"
+          style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
+        >
+          <span className="text-xl leading-none mt-0.5">⚠️</span>
+          <div>
+            <p className="text-red-300 text-sm font-extrabold mb-0.5">
+              Comprobante rechazado
+            </p>
+            <p className="text-gray-400 text-xs leading-relaxed">
+              Tu comprobante anterior fue rechazado. Sube uno nuevo para continuar con tu pedido.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Card datos bancarios ── */}
       <div
@@ -302,8 +337,8 @@ function TransferenciaContent() {
               </div>
             )}
 
-            {/* No pagoId warning */}
-            {!pagoId && (
+            {/* No pagoId warning — solo si no es modo resubir con orden disponible */}
+            {!pagoId && !(resubir && ordenId && total) && (
               <div
                 className="rounded-xl px-4 py-3"
                 style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}
@@ -318,11 +353,11 @@ function TransferenciaContent() {
             <button
               type="button"
               onClick={handleUpload}
-              disabled={!file || uploading || !pagoId}
+              disabled={!file || uploading || (!pagoId && !(resubir && ordenId && total))}
               className="w-full py-4 rounded-2xl text-white font-extrabold text-base transition-all active:scale-95 disabled:opacity-40"
               style={{
                 background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
-                boxShadow: file && pagoId ? '0 6px 20px rgba(242,133,0,0.35)' : 'none',
+                boxShadow: file && (pagoId || resubir) ? '0 6px 20px rgba(242,133,0,0.35)' : 'none',
               }}
             >
               {uploading ? (

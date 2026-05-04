@@ -22,10 +22,18 @@ interface OrdenCombo {
   combos: { nombre: string }
 }
 
+interface PagoResumen {
+  id: number
+  comprobante_url: string | null
+  confirmado: boolean | null
+  metodo_pago_id: number
+}
+
 interface OrdenHistorial {
   id: number
   numero: string
   estado: string
+  notas_orden: string | null
   subtotal: string
   total: string
   creado_en: string
@@ -36,6 +44,7 @@ interface OrdenHistorial {
   longitud_entrega: number | string | null
   orden_detalles: OrdenDetalle[]
   orden_combos: OrdenCombo[]
+  pagos?: PagoResumen[]
 }
 
 type EditItem =
@@ -454,8 +463,32 @@ export default function MisPedidosPage() {
             </h1>
 
             {ordenes.map((orden, index) => {
-              const estadoConfig = ESTADO_CONFIG[orden.estado] ?? ESTADO_CONFIG['pendiente']
-              const esPendiente = orden.estado === 'pendiente'
+              // ── Detección de estado de transferencia ────────────────────────
+              const tieneComprobanteRechazado =
+                orden.estado === 'pendiente' &&
+                orden.notas_orden?.includes('Comprobante rechazado')
+
+              const pagoTransferencia = orden.pagos?.find(
+                (p) => p.metodo_pago_id === 3
+              )
+
+              const esperandoRevision =
+                orden.estado === 'pendiente' &&
+                !!pagoTransferencia?.comprobante_url &&
+                pagoTransferencia?.confirmado === null &&
+                !tieneComprobanteRechazado
+
+              const estadoConfig = tieneComprobanteRechazado
+                ? { label: '⚠️ Comprobante rechazado', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' }
+                : esperandoRevision
+                ? { label: '🕐 En revisión', color: '#F28500', bg: 'rgba(242,133,0,0.15)' }
+                : ESTADO_CONFIG[orden.estado] ?? ESTADO_CONFIG['pendiente']
+
+              // Solo mostrar botón Modificar en pendiente sin comprobante subido
+              const esPendiente =
+                orden.estado === 'pendiente' &&
+                !tieneComprobanteRechazado &&
+                !esperandoRevision
 
               return (
                 <div
@@ -507,9 +540,38 @@ export default function MisPedidosPage() {
                     </div>
                   )}
 
+                  {/* Card de comprobante rechazado */}
+                  {tieneComprobanteRechazado && (
+                    <div
+                      className="mt-3 rounded-xl p-3"
+                      style={{
+                        background: 'rgba(231,76,60,0.08)',
+                        border: '1px solid rgba(231,76,60,0.25)',
+                      }}
+                    >
+                      <p className="text-red-300 text-xs font-bold mb-1">
+                        ⚠️ Tu comprobante fue rechazado
+                      </p>
+                      <p className="text-gray-400 text-xs mb-2">{orden.notas_orden}</p>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/transferencia?ordenId=${orden.id}&total=${orden.total}&pagoId=${pagoTransferencia?.id ?? ''}&resubir=true`
+                          )
+                        }
+                        className="w-full py-2 rounded-xl text-white font-extrabold text-xs"
+                        style={{
+                          background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
+                        }}
+                      >
+                        📎 Subir nuevo comprobante
+                      </button>
+                    </div>
+                  )}
+
                   {/* Footer: date + total + modify button */}
                   <div
-                    className="flex items-center justify-between pt-2"
+                    className="flex items-center justify-between pt-2 mt-3"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
                   >
                     <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
