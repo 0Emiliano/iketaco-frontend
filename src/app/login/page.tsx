@@ -33,7 +33,7 @@ function Spinner() {
 
 const REDIRECT: Record<string, string> = {
   gerente: '/admin', cajero: '/cajero', cocinero: '/cocina',
-  mesero: '/mesero', repartidor: '/entregas',
+  mesero: '/mesero', repartidor: '/repartidor',
 }
 
 const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
