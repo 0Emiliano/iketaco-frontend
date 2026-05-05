@@ -22,6 +22,16 @@ interface TransferenciaPendiente {
   }
 }
 
+interface OrdenCompletada {
+  id: number
+  numero: string
+  estado: string
+  total: string | number
+  nombre_cliente: string | null
+  creado_en: string
+  tipo_servicio?: string | null
+}
+
 interface OrdenPendiente {
   id: number
   numero: string
@@ -361,6 +371,7 @@ export default function CajeroPage() {
 
   const [transferencias,  setTransferencias]  = useState<TransferenciaPendiente[]>([])
   const [ordenesCobro,    setOrdenesCobro]    = useState<OrdenPendiente[]>([])
+  const [ordenesHoy,      setOrdenesHoy]      = useState<OrdenCompletada[]>([])
   const [fetchError,      setFetchError]      = useState('')
 
   const [servicioLoading, setServicioLoading] = useState(false)
@@ -387,10 +398,11 @@ export default function CajeroPage() {
     setFetchError('')
     try {
       const headers = { Authorization: `Bearer ${token}` }
-      const [txRes, pendRes, svcRes] = await Promise.allSettled([
+      const [txRes, pendRes, svcRes, ordRes] = await Promise.allSettled([
         apiClient.get('/payments/pending-transfers', { headers }),
         apiClient.get('/payments/pendientes',         { headers }),
         apiClient.get('/services/active'),
+        apiClient.get('/orders',                      { headers }),
       ])
 
       if (txRes.status === 'fulfilled') {
@@ -409,6 +421,16 @@ export default function CajeroPage() {
         setServicio(svcRes.value.data)
       } else {
         setServicio(null)
+      }
+
+      if (ordRes.status === 'fulfilled') {
+        const allOrders: OrdenCompletada[] = ordRes.value.data?.items ?? []
+        const hace8h = Date.now() - 8 * 60 * 60 * 1000
+        setOrdenesHoy(
+          allOrders.filter(
+            (o) => o.estado === 'entregada' && new Date(o.creado_en).getTime() >= hace8h
+          )
+        )
       }
     } catch {
       setFetchError('Error al cargar datos. Verifica tu conexión.')
@@ -589,6 +611,56 @@ export default function CajeroPage() {
             </div>
           )}
         </section>
+
+        {/* ════════════════════════════════════════
+            SECCIÓN C — Completadas hoy (últimas 8 h)
+        ════════════════════════════════════════ */}
+        {ordenesHoy.length > 0 && (
+          <section style={{ opacity: 0.6 }}>
+            <SectionHeader
+              title="Completadas hoy"
+              count={ordenesHoy.length}
+              color="#9CA3AF"
+            />
+            <div className="flex flex-col gap-2">
+              {ordenesHoy.map((orden) => (
+                <div
+                  key={orden.id}
+                  className="rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
+                  style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className="text-xs font-black px-2 py-1 rounded-lg flex-shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.08)', color: '#9CA3AF' }}
+                    >
+                      {orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}
+                    </span>
+                    {orden.nombre_cliente && (
+                      <span className="text-gray-400 text-xs font-semibold truncate">
+                        {orden.nombre_cliente}
+                      </span>
+                    )}
+                    {orden.tipo_servicio === 'domicilio' && (
+                      <span
+                        className="text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        style={{ background: 'rgba(41,128,185,0.12)', color: '#5DADE2' }}
+                      >
+                        domicilio
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm font-extrabold text-gray-300">
+                      {fmt$(orden.total)}
+                    </p>
+                    <p className="text-xs text-gray-600">{formatFecha(orden.creado_en)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
       </main>
     </div>
