@@ -452,6 +452,18 @@ export default function CocinaPage() {
               <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
+          <button
+            onClick={() => {
+              apiClient.post('/auth/logout').catch(() => {})
+              localStorage.removeItem('accessToken')
+              localStorage.removeItem('usuario')
+              router.push('/login')
+            }}
+            className="text-gray-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
+          >
+            Salir
+          </button>
         </div>
       </div>
 
