@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import apiClient from '@/lib/api/client'
@@ -225,6 +225,14 @@ const defaults = defaultRanges()
 
 export default function ReportsPage() {
   const router = useRouter()
+
+  // ── Auth guard ──
+  useEffect(() => {
+    const raw = localStorage.getItem('usuario')
+    if (!raw) { router.push('/login'); return }
+    const u = JSON.parse(raw)
+    if (u.rol !== 'gerente') { router.push('/menu'); return }
+  }, [router])
 
   // ── Comparativo state ──
   const [p1Start, setP1Start] = useState(defaults.p1Start)

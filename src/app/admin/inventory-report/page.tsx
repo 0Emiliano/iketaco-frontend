@@ -224,16 +224,21 @@ export default function InventoryReportPage() {
         {reporte && !loading && (
           <>
             {/* Aviso de costo parcial */}
-            {reporte.resumen.costoParcial && (
+            {(reporte.resumen.costoParcial || reporte.consumos.some(i => !i.costoUnitario)) && (
               <div
-                className="rounded-2xl px-4 py-3"
-                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}
+                className="rounded-xl p-3"
+                style={{ background: 'rgba(243,156,18,0.1)', border: '1px solid rgba(243,156,18,0.3)' }}
               >
-                <p className="text-yellow-300 text-xs font-semibold">
-                  {reporte.resumen.ingredientesSinCosto} ingrediente
-                  {reporte.resumen.ingredientesSinCosto !== 1 ? 's' : ''} sin costo
-                  registrado — el costo total es parcial.
-                </p>
+                <div className="flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F39C12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <p className="text-yellow-300 text-sm font-bold">
+                    Costo parcial — Algunos ingredientes no tienen costo configurado
+                  </p>
+                </div>
               </div>
             )}
 
@@ -307,14 +312,11 @@ export default function InventoryReportPage() {
                       {fmtCantidad(item.cantidadConsumida)}
                     </span>
                     <span className="text-gray-500 text-right">{item.unidad}</span>
-                    <span className="text-gray-400 text-right tabular-nums">
-                      {item.costoUnitario !== null ? fmt$(item.costoUnitario) : '—'}
+                    <span className="text-right tabular-nums" style={{ color: item.costoUnitario ? '#9CA3AF' : '#F39C12' }}>
+                      {item.costoUnitario ? fmt$(item.costoUnitario) : 'Sin costo'}
                     </span>
-                    <span
-                      className="font-extrabold text-right tabular-nums"
-                      style={{ color: item.costoTotal !== null ? '#F28500' : '#6B7280' }}
-                    >
-                      {item.costoTotal !== null ? fmt$(item.costoTotal) : '—'}
+                    <span className="font-extrabold text-right tabular-nums" style={{ color: item.costoTotal ? '#F28500' : '#F39C12' }}>
+                      {item.costoTotal ? fmt$(item.costoTotal) : '—'}
                     </span>
                   </div>
                 ))}
