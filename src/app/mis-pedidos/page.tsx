@@ -24,9 +24,10 @@ interface OrdenCombo {
 
 interface PagoResumen {
   id: number
+  metodo_pago_id: number
+  monto: string
   comprobante_url: string | null
   confirmado: boolean | null
-  metodo_pago_id: number
 }
 
 interface OrdenHistorial {
@@ -468,31 +469,41 @@ export default function MisPedidosPage() {
 
             {ordenes.map((orden, index) => {
               // ── Detección de estado de transferencia ────────────────────────
-              const tieneComprobanteRechazado =
-                orden.estado === 'pendiente' &&
-                orden.notas_orden?.includes('Comprobante rechazado')
-
               const pagoTransferencia = orden.pagos?.find(
                 (p) => p.metodo_pago_id === 3
               )
 
-              const esperandoRevision =
-                orden.estado === 'pendiente' &&
-                !!pagoTransferencia?.comprobante_url &&
-                pagoTransferencia?.confirmado === null &&
-                !tieneComprobanteRechazado
+              // Cajero registró transferencia pero cliente aún no sube comprobante
+              const necesitaTransferencia =
+                pagoTransferencia !== undefined &&
+                pagoTransferencia.comprobante_url === null &&
+                pagoTransferencia.confirmado === null
 
-              const estadoConfig = tieneComprobanteRechazado
-                ? { label: '⚠️ Comprobante rechazado', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' }
-                : esperandoRevision
-                ? { label: '🕐 En revisión', color: '#F28500', bg: 'rgba(242,133,0,0.15)' }
+              // Comprobante subido, esperando confirmación del cajero
+              const comprobanteEnRevision =
+                pagoTransferencia !== undefined &&
+                pagoTransferencia.comprobante_url !== null &&
+                pagoTransferencia.confirmado === null
+
+              // Comprobante rechazado por el cajero (vía flag o vía notas)
+              const comprobanteRechazado =
+                (pagoTransferencia !== undefined && pagoTransferencia.confirmado === false) ||
+                (orden.estado === 'pendiente' && !!orden.notas_orden?.includes('Comprobante rechazado'))
+
+              const estadoConfig = comprobanteRechazado
+                ? { label: 'Comprobante rechazado', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' }
+                : comprobanteEnRevision
+                ? { label: 'En revisión', color: '#F28500', bg: 'rgba(242,133,0,0.15)' }
+                : necesitaTransferencia
+                ? { label: 'Pago pendiente', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' }
                 : ESTADO_CONFIG[orden.estado] ?? ESTADO_CONFIG['pendiente']
 
-              // Solo mostrar botón Modificar en pendiente sin comprobante subido
+              // Solo mostrar botón Modificar en pendiente sin transferencia en curso
               const esPendiente =
                 orden.estado === 'pendiente' &&
-                !tieneComprobanteRechazado &&
-                !esperandoRevision
+                !comprobanteRechazado &&
+                !comprobanteEnRevision &&
+                !necesitaTransferencia
 
               return (
                 <div
@@ -544,8 +555,72 @@ export default function MisPedidosPage() {
                     </div>
                   )}
 
-                  {/* Card de comprobante rechazado */}
-                  {tieneComprobanteRechazado && (
+                  {/* Transferencia pendiente — cajero la registró, cliente aún no paga */}
+                  {necesitaTransferencia && (
+                    <div
+                      className="mt-3 rounded-xl p-3"
+                      style={{
+                        background: 'rgba(41,128,185,0.1)',
+                        border: '1px solid rgba(41,128,185,0.35)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        <p className="text-blue-300 font-extrabold text-sm">
+                          Pago por transferencia requerido
+                        </p>
+                      </div>
+                      <p className="text-gray-400 text-xs mb-2">
+                        El cajero registró tu pedido con pago por transferencia.
+                        Realiza la transferencia y sube tu comprobante.
+                      </p>
+                      <p className="text-white text-sm font-extrabold mb-3">
+                        Monto: ${parseFloat(pagoTransferencia!.monto).toFixed(2)}
+                      </p>
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/transferencia?ordenId=${orden.id}&total=${pagoTransferencia!.monto}&pagoId=${pagoTransferencia!.id}`
+                          )
+                        }
+                        className="w-full py-2.5 rounded-xl text-white font-extrabold text-sm transition active:scale-95 flex items-center justify-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, #2980B9 0%, #1A5276 100%)' }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Ir a pagar por transferencia
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Comprobante en revisión */}
+                  {comprobanteEnRevision && (
+                    <div
+                      className="mt-3 rounded-xl p-3"
+                      style={{
+                        background: 'rgba(242,133,0,0.08)',
+                        border: '1px solid rgba(242,133,0,0.25)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FDBA74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <p className="text-orange-300 font-extrabold text-sm">
+                          Comprobante en revisión
+                        </p>
+                      </div>
+                      <p className="text-gray-400 text-xs">
+                        Tu comprobante fue enviado. El cajero lo está revisando.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Comprobante rechazado */}
+                  {comprobanteRechazado && (
                     <div
                       className="mt-3 rounded-xl p-3"
                       style={{
@@ -553,22 +628,32 @@ export default function MisPedidosPage() {
                         border: '1px solid rgba(231,76,60,0.25)',
                       }}
                     >
-                      <p className="text-red-300 text-xs font-bold mb-1">
-                        ⚠️ Tu comprobante fue rechazado
+                      <div className="flex items-center gap-2 mb-1">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <p className="text-red-300 text-sm font-bold">
+                          Tu comprobante fue rechazado
+                        </p>
+                      </div>
+                      <p className="text-gray-400 text-xs mb-2">
+                        {orden.notas_orden?.includes('Comprobante rechazado')
+                          ? orden.notas_orden
+                          : 'Tu comprobante fue rechazado. Por favor sube uno nuevo.'}
                       </p>
-                      <p className="text-gray-400 text-xs mb-2">{orden.notas_orden}</p>
                       <button
                         onClick={() =>
                           router.push(
-                            `/transferencia?ordenId=${orden.id}&total=${orden.total}&pagoId=${pagoTransferencia?.id ?? ''}&resubir=true`
+                            `/transferencia?ordenId=${orden.id}&total=${pagoTransferencia!.monto}&pagoId=${pagoTransferencia!.id}&resubir=true`
                           )
                         }
-                        className="w-full py-2 rounded-xl text-white font-extrabold text-xs"
-                        style={{
-                          background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
-                        }}
+                        className="w-full py-2 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2"
+                        style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
                       >
-                        📎 Subir nuevo comprobante
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        Subir nuevo comprobante
                       </button>
                     </div>
                   )}
