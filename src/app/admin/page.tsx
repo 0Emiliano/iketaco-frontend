@@ -491,6 +491,26 @@ export default function AdminPage() {
               </button>
             </div>
 
+            {/* Alertas de stock — independiente de resumenHoy */}
+            {dashboard?.alertasStock > 0 && (
+              <div
+                className="rounded-2xl p-4 mb-4 flex items-center gap-3"
+                style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E74C3C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div>
+                  <p className="text-red-300 font-extrabold text-sm">
+                    Stock bajo en {dashboard.alertasStock} ingrediente{dashboard.alertasStock !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-red-200 text-xs">Revisa el inventario</p>
+                </div>
+              </div>
+            )}
+
             {/* Stats del día */}
             {dashboard?.resumenHoy && (
               <>
@@ -551,25 +571,6 @@ export default function AdminPage() {
                       </div>
                     </div>
                   )}
-
-                {/* Alertas de stock */}
-                {dashboard.alertasStock > 0 && (
-                  <div
-                    className="rounded-2xl p-4 flex items-center gap-3"
-                    style={{
-                      background: 'rgba(231,76,60,0.1)',
-                      border: '1px solid rgba(231,76,60,0.3)',
-                    }}
-                  >
-                    <div>
-                      <p className="text-white font-extrabold text-sm">Alerta de inventario</p>
-                      <p className="text-red-300 text-xs mt-0.5">
-                        {dashboard.alertasStock} ingrediente{dashboard.alertasStock > 1 ? 's' : ''}{' '}
-                        con stock bajo
-                      </p>
-                    </div>
-                  </div>
-                )}
               </>
             )}
 

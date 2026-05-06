@@ -7,7 +7,7 @@ import apiClient from '@/lib/api/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Rol = 'gerente' | 'cajero' | 'cocinero' | 'repartidor' | 'cliente'
+type Rol = 'gerente' | 'cajero' | 'cocinero' | 'mesero' | 'repartidor' | 'cliente'
 
 interface Empleado {
   id: number
@@ -31,11 +31,12 @@ const ROL_CONFIG: Record<Rol, { label: string; color: string; bg: string; border
   gerente:     { label: 'Gerente',     color: '#F28500', bg: 'rgba(242,133,0,0.15)',   border: 'rgba(242,133,0,0.35)'   },
   cajero:      { label: 'Cajero',      color: '#2980B9', bg: 'rgba(41,128,185,0.15)',  border: 'rgba(41,128,185,0.35)'  },
   cocinero:    { label: 'Cocinero',    color: '#E74C3C', bg: 'rgba(231,76,60,0.15)',   border: 'rgba(231,76,60,0.35)'   },
+  mesero:      { label: 'Mesero',      color: '#8B5CF6', bg: 'rgba(139,92,246,0.15)',  border: 'rgba(139,92,246,0.35)'  },
   repartidor:  { label: 'Repartidor',  color: '#27AE60', bg: 'rgba(39,174,96,0.15)',   border: 'rgba(39,174,96,0.35)'   },
   cliente:     { label: 'Cliente',     color: '#6B7280', bg: 'rgba(107,114,128,0.15)', border: 'rgba(107,114,128,0.3)'  },
 }
 
-const ROLES: Rol[] = ['gerente', 'cajero', 'cocinero', 'repartidor', 'cliente']
+const ROLES: Rol[] = ['gerente', 'cajero', 'cocinero', 'mesero', 'repartidor', 'cliente']
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
