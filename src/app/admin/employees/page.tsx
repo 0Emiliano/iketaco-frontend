@@ -101,7 +101,7 @@ function RolModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
@@ -111,6 +111,8 @@ function RolModal({
           background: '#1A1A1A',
           border: '1px solid rgba(255,255,255,0.08)',
           animation: 'slideUp 0.22s cubic-bezier(0.16,1,0.3,1) both',
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
       >
         {/* Header */}
