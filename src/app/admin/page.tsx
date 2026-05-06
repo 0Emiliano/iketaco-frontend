@@ -492,7 +492,7 @@ export default function AdminPage() {
             </div>
 
             {/* Alertas de stock — independiente de resumenHoy */}
-            {(dashboard?.alertasStock ?? 0) > 0 && (
+            {dashboard && dashboard.alertasStock > 0 && (
               <div
                 className="rounded-2xl p-4 mb-4 flex items-center gap-3"
                 style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.3)' }}
