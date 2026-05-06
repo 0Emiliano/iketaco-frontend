@@ -446,9 +446,26 @@ export default function ReportsPage() {
                           </td>
                           <td className="py-3 px-3 text-right"><span className="text-sm tabular-nums" style={{ color: prod.periodo1 ? '#F3F4F6' : '#4B5563' }}>{prod.periodo1?.cantidad ?? '—'}</span></td>
                           <td className="py-3 px-3 text-right"><span className="text-sm tabular-nums" style={{ color: prod.periodo1 ? '#F3F4F6' : '#4B5563' }}>{prod.periodo1 ? fmt$(prod.periodo1.total) : '—'}</span></td>
-                          <td className="py-3 px-3 text-right"><span className="text-sm tabular-nums" style={{ color: prod.periodo2 ? '#F3F4F6' : '#4B5563' }}>{prod.periodo2?.cantidad ?? '—'}</span></td>
-                          <td className="py-3 px-3 text-right"><span className="text-sm tabular-nums" style={{ color: prod.periodo2 ? '#F3F4F6' : '#4B5563' }}>{prod.periodo2 ? fmt$(prod.periodo2.total) : '—'}</span></td>
-                          <td className="py-3 pl-3 pr-5 text-right"><VarChip v={prod.variacionCantidad} /></td>
+                          <td className="py-3 px-3 text-right">
+                            <span className="text-sm tabular-nums" style={{ color: prod.periodo2 && prod.periodo2.cantidad > 0 ? '#F3F4F6' : '#4B5563' }}>
+                              {prod.periodo2 && prod.periodo2.cantidad > 0 ? prod.periodo2.cantidad : '—'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-right">
+                            <span className="text-sm tabular-nums" style={{ color: prod.periodo2 && prod.periodo2.total > 0 ? '#F3F4F6' : '#4B5563' }}>
+                              {prod.periodo2 && prod.periodo2.total > 0 ? fmt$(prod.periodo2.total) : '—'}
+                            </span>
+                          </td>
+                          <td className="py-3 pl-3 pr-5 text-right">
+                            {(() => {
+                              const c1 = prod.periodo1?.cantidad ?? 0
+                              const c2 = prod.periodo2?.cantidad ?? 0
+                              if (c1 === 0 && c2 === 0) return <span className="text-xs font-bold text-gray-500">—</span>
+                              if (c1 === 0) return <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-extrabold" style={{ background: 'rgba(39,174,96,0.12)', border: '1px solid rgba(39,174,96,0.3)', color: '#27AE60' }}>Nuevo</span>
+                              if (c2 === 0) return <span className="text-xs font-bold text-gray-500">—</span>
+                              return <VarChip v={prod.variacionCantidad} />
+                            })()}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
