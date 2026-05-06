@@ -1,6 +1,17 @@
 import LogoIcon from '@/components/ui/LogoIcon'
+import { getPromociones } from '@/data/products'
+import type { Promocion } from '@/types'
 
-export default function HeroBanner() {
+export default async function HeroBanner() {
+  let promo: Promocion | null = null
+  try {
+    const promos = await getPromociones()
+    promo = promos[0] ?? null
+  } catch {
+    // Si falla la petición al backend, usar el banner default
+    promo = null
+  }
+
   return (
     <div className="relative w-full overflow-hidden rounded-3xl shadow-2xl" style={{ minHeight: '260px' }}>
       {/* Rich dark-brown background */}
@@ -71,12 +82,23 @@ export default function HeroBanner() {
 
         {/* Bottom: Promo text */}
         <div className="flex flex-col gap-1 mt-auto">
-          <span
-            className="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest self-start"
-            style={{ background: 'rgba(242,133,0,0.25)', color: '#F9A825', border: '1px solid rgba(242,133,0,0.4)' }}
-          >
-            Promo del día
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className="inline-block px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-widest"
+              style={{ background: 'rgba(242,133,0,0.25)', color: '#F9A825', border: '1px solid rgba(242,133,0,0.4)' }}
+            >
+              {promo ? 'Promo del día' : 'Bienvenido'}
+            </span>
+            {promo?.combos?.precio && (
+              <span
+                className="inline-block px-3 py-1 rounded-full text-xs font-extrabold"
+                style={{ background: 'rgba(39,174,96,0.2)', color: '#27AE60', border: '1px solid rgba(39,174,96,0.4)' }}
+              >
+                ${parseFloat(promo.combos.precio).toFixed(2)}
+              </span>
+            )}
+          </div>
+
           <h2
             className="text-white font-display leading-tight"
             style={{
@@ -84,10 +106,11 @@ export default function HeroBanner() {
               textShadow: '0 3px 16px rgba(0,0,0,0.8)',
             }}
           >
-            3 TACOS + BEBIDA
+            {promo ? promo.nombre.toUpperCase() : '3 TACOS + BEBIDA'}
           </h2>
+
           <p className="text-white/70 text-sm font-extrabold">
-            ¡Disfruta la mejor birria!
+            {promo?.descripcion ?? '¡Disfruta la mejor birria!'}
           </p>
         </div>
       </div>
