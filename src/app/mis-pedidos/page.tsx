@@ -304,7 +304,12 @@ export default function MisPedidosPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => { fetchOrdenes() }, [fetchOrdenes])
+  useEffect(() => {
+    fetchOrdenes()
+    // Refresca cada 12 s para que el cliente vea cambios de estado sin recargar
+    const interval = setInterval(fetchOrdenes, 12000)
+    return () => clearInterval(interval)
+  }, [fetchOrdenes])
 
   // ── Open modal ──
   const openModal = (orden: OrdenHistorial) => {

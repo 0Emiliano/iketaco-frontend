@@ -21,6 +21,29 @@ export default function CartPage() {
               className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
               style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
             >
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"
+                  stroke="#F28500"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M3 6h18"
+                  stroke="#F28500"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 10a4 4 0 01-8 0"
+                  stroke="#F28500"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
               CARRITO VACÍO
