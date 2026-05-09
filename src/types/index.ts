@@ -47,9 +47,13 @@ export interface Promocion {
   id: number
   nombre: string
   descripcion: string | null
-  tipo_descuento: string
+  tipo_descuento: 'porcentaje' | 'monto_fijo'
   valor: string
+  combo_id: number | null
   solo_dia: string | null
+  fecha_inicio: string | null
+  fecha_fin: string | null
+  activo: boolean
   combos: {
     id: number
     nombre: string
