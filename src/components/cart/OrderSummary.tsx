@@ -1,11 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
 import type { TipoServicio, OrdenRequest } from '@/types'
+
+const DeliveryMap = dynamic(() => import('./DeliveryMap'), { ssr: false })
 
 // ─── Selector card (shared for tipo-servicio and metodo-pago) ────────────────
 
@@ -112,6 +115,10 @@ export default function OrderSummary() {
     setErrorDireccion('')
     setErrorTelefono('')
   }, [tipoServicio])
+
+  const handleMapChange = useCallback((coords: { lat: number; lng: number }) => {
+    setCoordEntrega(coords)
+  }, [])
 
   // ── Geolocation ──────────────────────────────────────────────────────────────
 
@@ -322,27 +329,34 @@ export default function OrderSummary() {
               </button>
             )}
 
-            {ubicacionEstado === 'success' && (
-              <div
-                className="rounded-2xl px-4 py-3"
-                style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.3)' }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-extrabold" style={{ color: '#27AE60' }}>✓ Ubicación obtenida</p>
-                    <p className="text-xs font-medium mt-0.5" style={{ color: '#6FCF97' }}>
-                      Tu ubicación GPS fue registrada correctamente
-                    </p>
+            {ubicacionEstado === 'success' && coordEntrega && (
+              <div className="flex flex-col gap-2">
+                <div
+                  className="rounded-2xl px-4 py-3"
+                  style={{ background: 'rgba(39,174,96,0.1)', border: '1px solid rgba(39,174,96,0.3)' }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-extrabold" style={{ color: '#27AE60' }}>✓ Ubicación obtenida</p>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: '#6FCF97' }}>
+                        Confirma o ajusta el marcador en el mapa
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={obtenerUbicacion}
+                      className="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
+                      style={{ background: 'rgba(39,174,96,0.15)', color: '#27AE60', border: '1px solid rgba(39,174,96,0.3)' }}
+                    >
+                      Actualizar GPS
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={obtenerUbicacion}
-                    className="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
-                    style={{ background: 'rgba(39,174,96,0.15)', color: '#27AE60', border: '1px solid rgba(39,174,96,0.3)' }}
-                  >
-                    Actualizar
-                  </button>
                 </div>
+                <DeliveryMap
+                  lat={coordEntrega.lat}
+                  lng={coordEntrega.lng}
+                  onChange={handleMapChange}
+                />
               </div>
             )}
 
