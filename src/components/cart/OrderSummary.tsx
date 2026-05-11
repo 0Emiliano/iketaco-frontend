@@ -8,7 +8,8 @@ import { useCart } from '@/context/CartContext'
 import apiClient from '@/lib/api/client'
 import type { TipoServicio, OrdenRequest } from '@/types'
 
-const DeliveryMap = dynamic(() => import('./DeliveryMap'), { ssr: false })
+const DeliveryMap            = dynamic(() => import('./DeliveryMap'), { ssr: false })
+const LazyRegistrationSheet  = dynamic(() => import('./LazyRegistrationSheet'), { ssr: false })
 
 // ─── Selector card (shared for tipo-servicio and metodo-pago) ────────────────
 
@@ -81,9 +82,16 @@ export default function OrderSummary() {
   const { state, subtotal, total, clearCart } = useCart()
   const router = useRouter()
 
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState('')
-  const [sinLogin, setSinLogin] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState('')
+
+  // Auth state — guest checkout is allowed; token is optional
+  const [isGuest, setIsGuest] = useState(false)
+  const [guestNombre, setGuestNombre] = useState('')
+
+  // Lazy registration sheet
+  const [lazyReg, setLazyReg] = useState<{ numero: string; total: string } | null>(null)
+  const [confirmUrl, setConfirmUrl] = useState('')
 
   // Tipo de servicio
   const [tipoServicio, setTipoServicio] = useState<TipoServicio>('mostrador')
@@ -92,7 +100,7 @@ export default function OrderSummary() {
   // Delivery fields
   const [ubicacionEstado, setUbicacionEstado] = useState<UbicacionEstado>('idle')
   const [coordEntrega,    setCoordEntrega]    = useState<{ lat: number; lng: number } | null>(null)
-  const [direccionTexto,  setDireccionTexto]  = useState('')   // referencias del cliente
+  const [direccionTexto,  setDireccionTexto]  = useState('')
   const [telefono,        setTelefono]        = useState('')
   const [errorUbicacion,  setErrorUbicacion]  = useState('')
   const [errorDireccion,  setErrorDireccion]  = useState('')
@@ -101,9 +109,8 @@ export default function OrderSummary() {
   // Método de pago
   const [metodoPago, setMetodoPago] = useState<MetodoPago>('efectivo')
 
-  // Pre-check login on mount
   useEffect(() => {
-    if (!localStorage.getItem('accessToken')) setSinLogin(true)
+    setIsGuest(!localStorage.getItem('accessToken'))
   }, [])
 
   // Reset delivery fields when switching service type
@@ -181,10 +188,9 @@ export default function OrderSummary() {
 
   const handleOrder = async () => {
     setError('')
-    const token = localStorage.getItem('accessToken')
-    if (!token) { setSinLogin(true); return }
-    setSinLogin(false)
     if (!validateDelivery()) return
+
+    const token = localStorage.getItem('accessToken') ?? null
 
     setLoading(true)
     try {
@@ -197,6 +203,7 @@ export default function OrderSummary() {
 
       const body: OrdenRequest = {
         tipoServicio, productos, combos,
+        ...(guestNombre.trim() && { nombreCliente: guestNombre.trim() }),
         ...(esDomicilio && {
           direccionEntrega: direccionTexto.trim(),
           telefonoCliente:  telefono.trim(),
@@ -205,29 +212,42 @@ export default function OrderSummary() {
             longitudEntrega: coordEntrega.lng,
           }),
         }),
+        ...(!esDomicilio && telefono.trim() && { telefonoCliente: telefono.trim() }),
       }
 
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+
       // 1. Create order
-      const ordenRes = await apiClient.post('/orders', body, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const ordenRes = await apiClient.post('/orders', body, { headers })
       const orden = ordenRes.data
 
-      // 2a. Efectivo → confirmacion (cajero handles payment)
+      // 2a. Efectivo — guest sees lazy registration before redirect
       if (metodoPago === 'efectivo') {
         clearCart()
-        router.push(`/confirmacion?orden=${orden.numero}&total=${orden.total}`)
+        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}`
+        if (!token) {
+          setConfirmUrl(url)
+          setLazyReg({ numero: orden.numero, total: orden.total })
+        } else {
+          router.push(url)
+        }
         return
       }
 
-      // 2b. Transferencia → create payment record → upload page
+      // 2b. Transferencia — requires a token (payment record needs user)
+      if (!token) {
+        clearCart()
+        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}`
+        setConfirmUrl(url)
+        setLazyReg({ numero: orden.numero, total: orden.total })
+        return
+      }
+
       const pagoRes = await apiClient.post('/payments', {
         ordenId:      orden.id,
         metodoPagoId: 3,
         monto:        parseFloat(orden.total),
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      }, { headers })
       const pago = pagoRes.data?.pago ?? pagoRes.data
 
       clearCart()
@@ -436,6 +456,36 @@ export default function OrderSummary() {
         )}
       </div>
 
+      {/* ── Guest name field ── */}
+      {isGuest && (
+        <div
+          className="rounded-2xl p-4 mb-4 flex flex-col gap-3"
+          style={{ background: '#151515', border: '1px solid rgba(255,255,255,0.06)', animation: 'fadeSlideDown 0.2s ease both' }}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-white font-extrabold text-sm">Tu nombre (opcional)</p>
+            <div className="flex gap-2">
+              <Link
+                href="/login"
+                className="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
+                style={{ background: 'rgba(242,133,0,0.12)', color: '#F28500', border: '1px solid rgba(242,133,0,0.3)' }}
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          </div>
+          <Field
+            id="guestNombre"
+            label=""
+            value={guestNombre}
+            onChange={setGuestNombre}
+            placeholder="Ej: Juan García"
+            maxLength={100}
+          />
+          <p className="text-xs text-gray-500 -mt-1">Puedes pedir sin cuenta. Al finalizar te ofrecemos guardar tu historial.</p>
+        </div>
+      )}
+
       {/* ── Error global ── */}
       {error && <p className="text-red-400 text-sm font-semibold text-center mb-4">{error}</p>}
 
@@ -450,33 +500,6 @@ export default function OrderSummary() {
         </Link>
         <p className="text-gray-500 text-xs font-medium mt-1">¿Olvidaste algo?</p>
       </div>
-
-      {/* ── Aviso sin login ── */}
-      {sinLogin && (
-        <div
-          className="rounded-2xl p-4 mb-4 text-center"
-          style={{ background: 'rgba(242,133,0,0.1)', border: '1px solid rgba(242,133,0,0.3)' }}
-        >
-          <p className="text-white font-extrabold text-base mb-1">Necesitas iniciar sesión</p>
-          <p className="text-gray-400 text-sm mb-3">Para realizar tu pedido necesitas una cuenta</p>
-          <div className="flex gap-2">
-            <Link
-              href="/login"
-              className="flex-1 py-2.5 rounded-xl text-white font-extrabold text-sm text-center"
-              style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
-            >
-              Iniciar sesión
-            </Link>
-            <Link
-              href="/register"
-              className="flex-1 py-2.5 rounded-xl font-extrabold text-sm text-center"
-              style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
-            >
-              Registrarse
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* ── Botón principal ── */}
       <button
@@ -502,6 +525,17 @@ export default function OrderSummary() {
           to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
+
+      {/* ── Lazy registration sheet (guest only, after order success) ── */}
+      {lazyReg && (
+        <LazyRegistrationSheet
+          ordenNumero={lazyReg.numero}
+          total={lazyReg.total}
+          guestNombre={guestNombre}
+          onSkip={() => router.push(confirmUrl)}
+          onSuccess={() => router.push(confirmUrl)}
+        />
+      )}
     </div>
   )
 }
