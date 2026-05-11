@@ -28,6 +28,7 @@ interface OrdenCompletada {
   estado: string
   total: string | number
   nombre_cliente: string | null
+  usuario_id: number | null
   creado_en: string
   tipo_servicio?: string | null
 }
@@ -38,6 +39,7 @@ interface OrdenPendiente {
   estado: string
   total: number
   nombre_cliente: string | null
+  usuario_id: number | null
   creado_en: string
   restante: number
   pagada: boolean
@@ -279,9 +281,23 @@ function OrdenCard({
           >
             {numeroCorto}
           </span>
-          {orden.nombre_cliente && (
-            <p className="text-gray-300 text-sm font-semibold mt-1">{orden.nombre_cliente}</p>
-          )}
+          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            {orden.nombre_cliente && (
+              <p className="text-gray-300 text-sm font-semibold">{orden.nombre_cliente}</p>
+            )}
+            {orden.usuario_id === null && (
+              <span
+                className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full"
+                style={{ background: 'rgba(156,163,175,0.12)', color: '#9CA3AF', border: '1px solid rgba(156,163,175,0.2)' }}
+                title="Pedido sin cuenta"
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Invitado
+              </span>
+            )}
+          </div>
           <span
             className="inline-flex items-center mt-1 text-xs font-bold px-2 py-0.5 rounded-full"
             style={{
@@ -639,6 +655,18 @@ export default function CajeroPage() {
                     {orden.nombre_cliente && (
                       <span className="text-gray-400 text-xs font-semibold truncate">
                         {orden.nombre_cliente}
+                      </span>
+                    )}
+                    {orden.usuario_id === null && (
+                      <span
+                        className="inline-flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
+                        style={{ background: 'rgba(156,163,175,0.1)', color: '#9CA3AF', border: '1px solid rgba(156,163,175,0.15)' }}
+                        title="Pedido sin cuenta"
+                      >
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Invitado
                       </span>
                     )}
                     {orden.tipo_servicio === 'domicilio' && (

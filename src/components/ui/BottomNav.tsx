@@ -27,39 +27,28 @@ const navItems = [
     label: 'Menú',
     icon: (active: boolean) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <rect
-          x="3"
-          y="5"
-          width="18"
-          height="2"
-          rx="1"
-          fill={active ? 'currentColor' : 'none'}
+        <rect x="3" y="5"  width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <rect x="3" y="11" width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <rect x="3" y="17" width="18" height="2" rx="1" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    href: '/cart',
+    label: 'Carrito',
+    icon: (active: boolean) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path
+          d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
-        />
-        <rect
-          x="3"
-          y="11"
-          width="18"
-          height="2"
-          rx="1"
+          strokeLinejoin="round"
           fill={active ? 'currentColor' : 'none'}
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
+          fillOpacity={active ? 0.15 : 0}
         />
-        <rect
-          x="3"
-          y="17"
-          width="18"
-          height="2"
-          rx="1"
-          fill={active ? 'currentColor' : 'none'}
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
+        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -77,18 +66,7 @@ const navItems = [
           fill={active ? 'currentColor' : 'none'}
           fillOpacity={active ? 0.15 : 0}
         />
-        <rect
-          x="9"
-          y="3"
-          width="6"
-          height="4"
-          rx="1"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          fill={active ? 'currentColor' : 'none'}
-          fillOpacity={active ? 0.2 : 0}
-        />
+        <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill={active ? 'currentColor' : 'none'} fillOpacity={active ? 0.2 : 0} />
         <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
       </svg>
     ),
@@ -116,6 +94,7 @@ export default function BottomNav() {
       <div className="flex items-center justify-around px-2 pb-safe">
         {navItems.map((item) => {
           const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href)
+          const isCart   = item.href === '/cart'
 
           return (
             <Link
@@ -131,7 +110,23 @@ export default function BottomNav() {
                 />
               )}
 
-              <span className="relative">{item.icon(isActive)}</span>
+              <span className="relative">
+                {item.icon(isActive)}
+                {/* Cart badge */}
+                {isCart && totalItems > 0 && (
+                  <span
+                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-white font-black"
+                    style={{
+                      fontSize: '10px',
+                      background: '#F28500',
+                      padding: '0 4px',
+                      boxShadow: '0 0 0 2px #0D0D0D',
+                    }}
+                  >
+                    {totalItems > 99 ? '99+' : totalItems}
+                  </span>
+                )}
+              </span>
 
               <span
                 className="text-xs font-bold tracking-wide transition-all"

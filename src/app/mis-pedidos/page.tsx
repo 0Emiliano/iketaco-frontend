@@ -402,32 +402,71 @@ export default function MisPedidosPage() {
       <div className="min-h-screen bg-[#0A0A0A]">
         <NavComponent title="Mis Pedidos" />
         <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
-          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-            <div
-              className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
-              style={{ background: '#1A1A1A' }}
-            >
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-0">
+
+            {/* Guest illustration */}
+            <div className="relative mb-6">
+              <div
+                className="w-28 h-28 rounded-full flex items-center justify-center"
+                style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4B5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              {/* Guest badge */}
+              <span
+                className="absolute -bottom-1 -right-1 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black"
+                style={{ background: '#1A1A1A', border: '1px solid rgba(156,163,175,0.25)', color: '#9CA3AF' }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Invitado
+              </span>
             </div>
+
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
-              INICIA SESIÓN
+              MODO INVITADO
             </h2>
-            <p className="text-gray-400 font-medium mb-8 text-sm">
-              Para ver tus pedidos necesitas una cuenta
+            <p className="text-gray-400 font-medium text-sm max-w-xs mb-2">
+              Estás navegando sin cuenta. Puedes hacer pedidos, pero para ver tu historial necesitas iniciar sesión.
             </p>
+
+            {/* Tip */}
+            <div
+              className="w-full max-w-xs rounded-2xl px-4 py-3 mb-6 text-left"
+              style={{ background: 'rgba(242,133,0,0.07)', border: '1px solid rgba(242,133,0,0.2)' }}
+            >
+              <p className="text-orange-300 text-xs font-semibold leading-snug">
+                💡 Si ya hiciste un pedido como invitado, puedes crear una cuenta ahora y tu historial quedará vinculado a tu correo.
+              </p>
+            </div>
+
             <div className="flex flex-col gap-3 w-full max-w-xs">
               <Link
                 href="/login"
                 className="w-full py-4 rounded-2xl text-white font-extrabold text-lg text-center transition-all active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)', boxShadow: '0 4px 14px rgba(242,133,0,0.3)' }}
               >
                 Iniciar sesión
               </Link>
               <Link
                 href="/register"
                 className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
-                style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+                style={{ background: 'rgba(255,255,255,0.07)', color: '#F28500', border: '1px solid rgba(242,133,0,0.2)' }}
               >
                 Crear cuenta
+              </Link>
+              <Link
+                href="/menu"
+                className="w-full py-3 rounded-2xl font-bold text-sm text-center transition-all active:scale-95"
+                style={{ color: '#6B7280' }}
+              >
+                Continuar sin cuenta →
               </Link>
             </div>
           </div>
