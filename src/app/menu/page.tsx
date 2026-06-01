@@ -79,8 +79,7 @@ export default function MenuPage() {
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
               style={{ background: '#1A1A1A' }}
-            >
-            </div>
+            ></div>
             <p className="text-white font-extrabold text-lg mb-1">No pudimos cargar el menú</p>
             <p className="text-gray-400 text-sm font-medium mb-5">
               Revisa tu conexión e intenta de nuevo
@@ -95,11 +94,13 @@ export default function MenuPage() {
           </div>
         )}
 
-        {!loading && !error && (
-          mostrandoCombos
-            ? <ComboList combos={combos} search={search} />
-            : <ProductList productos={productos} categoriaId={activaCategoriaId} search={search} />
-        )}
+        {!loading &&
+          !error &&
+          (mostrandoCombos ? (
+            <ComboList combos={combos} search={search} />
+          ) : (
+            <ProductList productos={productos} categoriaId={activaCategoriaId} search={search} />
+          ))}
       </main>
     </div>
   )
