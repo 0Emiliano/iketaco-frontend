@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
 import LogoIcon from './LogoIcon'
+import ThemeToggle from './ThemeToggle'
 import apiClient from '@/lib/api/client'
 
 interface NavComponentProps {
@@ -68,6 +69,8 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
         </Link>
 
         <div className="flex items-center gap-2">
+          {/* Theme toggle */}
+          <ThemeToggle />
           {/* Auth */}
           {usuario ? (
             <div className="relative">
@@ -104,20 +107,21 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
                   <div
                     className="absolute right-0 top-full mt-2 w-48 rounded-2xl overflow-hidden z-50"
                     style={{
-                      background: '#1A1A1A',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                      background: 'var(--nav-dropdown-bg)',
+                      border: '1px solid var(--border-color)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
                     }}
                   >
-                    <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <p className="text-white text-xs font-extrabold truncate">{usuario.email}</p>
-                      <p className="text-gray-400 text-xs capitalize mt-0.5">{usuario.rol}</p>
+                    <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <p className="text-xs font-extrabold truncate" style={{ color: 'var(--text-primary)' }}>{usuario.email}</p>
+                      <p className="text-xs capitalize mt-0.5" style={{ color: 'var(--text-secondary)' }}>{usuario.rol}</p>
                     </div>
                     {STAFF_DASHBOARD[usuario.rol] && (
                       <Link
                         href={STAFF_DASHBOARD[usuario.rol]}
                         onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-2 px-4 py-3 text-sm font-bold transition-colors hover:bg-black/5"
+                        style={{ color: 'var(--text-primary)' }}
                       >
                         Mi panel
                       </Link>
@@ -125,14 +129,15 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
                     <Link
                       href="/mis-pedidos"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 text-sm font-bold text-white hover:bg-white/5 transition-colors"
+                      className="flex items-center gap-2 px-4 py-3 text-sm font-bold transition-colors hover:bg-black/5"
+                      style={{ color: 'var(--text-primary)' }}
                     >
                       Mis pedidos
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2 px-4 py-3 text-sm font-bold text-red-400 hover:bg-white/5 transition-colors"
-                      style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm font-bold text-red-500 hover:bg-black/5 transition-colors"
+                      style={{ borderTop: '1px solid var(--border-color)' }}
                     >
                       Cerrar sesión
                     </button>

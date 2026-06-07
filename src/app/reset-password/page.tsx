@@ -104,7 +104,7 @@ function ResetPasswordForm() {
               onChange={(e) => setPassword(e.target.value)}
               type={showPassword ? 'text' : 'password'}
               required
-              className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/20 bg-[var(--bg-primary)] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
               placeholder="Mínimo 6 caracteres"
             />
             <button
@@ -126,7 +126,7 @@ function ResetPasswordForm() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               type={showPassword ? 'text' : 'password'}
               required
-              className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
+              className="w-full rounded-xl border border-white/20 bg-[var(--bg-primary)] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
               placeholder="Repite tu contraseña"
             />
           </div>
@@ -155,7 +155,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-white flex flex-col">
       <header className="px-4 py-4 border-b border-white/10">
         <div className="max-w-lg mx-auto">
           <Link href="/login" className="text-xs text-white/70 hover:text-white transition">

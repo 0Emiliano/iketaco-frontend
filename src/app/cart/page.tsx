@@ -11,7 +11,7 @@ export default function CartPage() {
   const isEmpty = state.items.length === 0
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <NavComponent title="Tu Pedido" />
 
       <main className="px-4 pt-20 pb-36 max-w-lg mx-auto w-full">
@@ -19,7 +19,7 @@ export default function CartPage() {
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
-              style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
             >
               <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path

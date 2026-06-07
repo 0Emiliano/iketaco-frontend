@@ -24,10 +24,10 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col">
       <div
         className="w-full h-56 flex items-center justify-center text-8xl"
-        style={{ background: '#1A1A1A' }}
+        style={{ background: 'var(--bg-secondary)' }}
       >
         {producto.imagen_url ? (
           <img
@@ -69,7 +69,7 @@ export default function ProductDetail({ producto }: ProductDetailProps) {
 
       <div
         className="fixed bottom-0 left-0 right-0 px-4 pb-24 pt-4 max-w-lg mx-auto"
-        style={{ background: 'linear-gradient(to top, #0A0A0A 80%, transparent)' }}
+        style={{ background: 'linear-gradient(to top, var(--bg-primary) 80%, transparent)' }}
       >
         <div className="flex items-center justify-between mb-3">
           <span className="text-gray-400 font-bold">Total</span>

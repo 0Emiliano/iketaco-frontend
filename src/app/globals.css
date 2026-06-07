@@ -4,23 +4,57 @@
 
 /* ─── CSS Variables ─────────────────────────────────────────────────────────── */
 :root {
+  /* Brand */
   --brand-orange: #f28500;
   --brand-orange-light: #f9a825;
   --brand-orange-dark: #d4700a;
-  --bg-black: #0a0a0a;
-  --card-bg: #1a1a1a;
+
+  /* Light theme (default) */
+  --bg-primary: #f7f4ef;
+  --bg-secondary: #edeae4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f5f2ed;
+  --text-primary: #1a1208;
+  --text-secondary: #6b7280;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --nav-dropdown-bg: #ffffff;
+  --scrollbar-track: #e8e5e0;
+  --scrollbar-thumb: #c0bdb8;
+  --bottom-nav-shadow: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='dark'] {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #1a1a1a;
+  --bg-card: #1a1a1a;
+  --bg-card-hover: #222222;
   --text-primary: #ffffff;
   --text-secondary: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --nav-dropdown-bg: #1a1a1a;
+  --scrollbar-track: #111111;
+  --scrollbar-thumb: #333333;
+  --bottom-nav-shadow: rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────────── */
 html,
 body {
-  background-color: var(--bg-black);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body), 'Nunito', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ─── Theme overrides for Tailwind utility classes ──────────────────────────── */
+:root:not([data-theme='dark']) .text-white {
+  color: var(--text-primary);
+}
+
+:root:not([data-theme='dark']) .text-gray-400 {
+  color: var(--text-secondary);
 }
 
 /* Smooth scroll */
@@ -41,10 +75,10 @@ body > * {
   height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #111;
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 

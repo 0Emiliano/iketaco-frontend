@@ -14,16 +14,16 @@ export default function ProductCard({ producto, index = 0 }: ProductCardProps) {
       href={`/product/${producto.id}`}
       className="flex items-center gap-4 rounded-2xl p-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] group animate-slide-up"
       style={{
-        background: '#1A1A1A',
+        background: 'var(--bg-secondary)',
         animationDelay: `${index * 0.07}s`,
         boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-        border: '1px solid rgba(255,255,255,0.04)',
+        border: '1px solid var(--border-color)',
       }}
     >
       {/* Imagen */}
       <div
         className="w-24 h-24 rounded-xl flex-shrink-0 overflow-hidden relative flex items-center justify-center text-4xl shadow-md"
-        style={{ background: '#2A2A2A' }}
+        style={{ background: 'var(--bg-card-hover)' }}
       >
         {producto.imagen_url ? (
           <img

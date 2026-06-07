@@ -5,7 +5,7 @@ import PopularSection from '@/components/home/PopularSection'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col">
       <NavComponent />
 
       <main className="flex-1 flex flex-col px-4 pt-20 pb-24 max-w-lg mx-auto w-full">

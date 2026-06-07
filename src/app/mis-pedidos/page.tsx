@@ -151,7 +151,7 @@ function EditModal({
       <div
         className="w-full max-w-lg rounded-3xl overflow-hidden"
         style={{
-          background: '#1A1A1A',
+          background: 'var(--bg-secondary)',
           border: '1px solid rgba(255,255,255,0.08)',
           animation: 'slideUp 0.22s cubic-bezier(0.16,1,0.3,1) both',
           maxHeight: '90vh',
@@ -161,7 +161,7 @@ function EditModal({
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+          style={{ borderBottom: '1px solid var(--border-color)' }}
         >
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-orange-400 font-bold mb-0.5">
@@ -174,7 +174,7 @@ function EditModal({
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-xl flex items-center justify-center text-lg text-gray-400 hover:text-white transition"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
+            style={{ background: 'var(--border-color)' }}
             aria-label="Cerrar"
           >
             ✕
@@ -196,7 +196,7 @@ function EditModal({
                     : 'rgba(255,255,255,0.04)',
                   border: isRemoved
                     ? '1px solid rgba(231,76,60,0.2)'
-                    : '1px solid rgba(255,255,255,0.06)',
+                    : '1px solid var(--border-color)',
                   opacity: isRemoved ? 0.55 : 1,
                 }}
               >
@@ -241,13 +241,13 @@ function EditModal({
         {/* Footer */}
         <div
           className="flex gap-3 px-5 py-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
+          style={{ borderTop: '1px solid var(--border-color)' }}
         >
           <button
             onClick={onClose}
             disabled={saving}
             className="flex-1 py-3 rounded-2xl text-sm font-extrabold transition active:scale-95 disabled:opacity-50"
-            style={{ background: 'rgba(255,255,255,0.07)', color: '#9CA3AF' }}
+            style={{ background: 'var(--border-color)', color: '#9CA3AF' }}
           >
             Cancelar
           </button>
@@ -390,7 +390,7 @@ export default function MisPedidosPage() {
   // ── Loading ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <p className="text-gray-400">Cargando pedidos...</p>
       </div>
     )
@@ -399,7 +399,7 @@ export default function MisPedidosPage() {
   // ── No login ──
   if (noLogueado) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A]">
+      <div className="min-h-screen bg-[var(--bg-primary)]">
         <NavComponent title="Mis Pedidos" />
         <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-0">
@@ -408,7 +408,7 @@ export default function MisPedidosPage() {
             <div className="relative mb-6">
               <div
                 className="w-28 h-28 rounded-full flex items-center justify-center"
-                style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
               >
                 <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4B5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -418,7 +418,7 @@ export default function MisPedidosPage() {
               {/* Guest badge */}
               <span
                 className="absolute -bottom-1 -right-1 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black"
-                style={{ background: '#1A1A1A', border: '1px solid rgba(156,163,175,0.25)', color: '#9CA3AF' }}
+                style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(156,163,175,0.25)', color: '#9CA3AF' }}
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"/>
@@ -457,7 +457,7 @@ export default function MisPedidosPage() {
               <Link
                 href="/register"
                 className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
-                style={{ background: 'rgba(255,255,255,0.07)', color: '#F28500', border: '1px solid rgba(242,133,0,0.2)' }}
+                style={{ background: 'var(--border-color)', color: '#F28500', border: '1px solid rgba(242,133,0,0.2)' }}
               >
                 Crear cuenta
               </Link>
@@ -477,7 +477,7 @@ export default function MisPedidosPage() {
 
   // ── Main render ──
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <NavComponent title="Mis Pedidos" />
 
       <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
@@ -487,7 +487,7 @@ export default function MisPedidosPage() {
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
-              style={{ background: '#1A1A1A' }}
+              style={{ background: 'var(--bg-secondary)' }}
             >
             </div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
@@ -551,8 +551,8 @@ export default function MisPedidosPage() {
                   key={orden.id}
                   className="rounded-2xl p-4 animate-slide-up"
                   style={{
-                    background: '#1A1A1A',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-color)',
                     animationDelay: `${index * 0.07}s`,
                   }}
                 >
@@ -702,7 +702,7 @@ export default function MisPedidosPage() {
                   {/* Footer: date + total + modify button */}
                   <div
                     className="flex items-center justify-between pt-2 mt-3"
-                    style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                    style={{ borderTop: '1px solid var(--border-color)' }}
                   >
                     <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
 

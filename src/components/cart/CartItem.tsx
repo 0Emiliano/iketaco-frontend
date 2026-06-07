@@ -22,7 +22,7 @@ export default function CartItem({ item }: CartItemProps) {
     <div
       className="flex items-center gap-3 rounded-2xl p-3 animate-slide-up"
       style={{
-        background: '#1A1A1A',
+        background: 'var(--bg-secondary)',
         border: '1px solid rgba(255,255,255,0.05)',
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}
@@ -30,7 +30,7 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Imagen */}
       <div
         className="w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden flex items-center justify-center text-3xl"
-        style={{ background: '#2A2A2A' }}
+        style={{ background: 'var(--bg-card-hover)' }}
       >
         {imagen ? (
           <img src={imagen} alt={nombre} className="w-full h-full object-cover" />
@@ -55,7 +55,7 @@ export default function CartItem({ item }: CartItemProps) {
             onClick={() => removeItem(id, tipo)}
             aria-label={`Eliminar ${nombre} del carrito`}
             className="text-gray-500 hover:text-red-400 transition-colors flex-shrink-0 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.06)', width: 36, height: 36, minWidth: 36 }}
+            style={{ background: 'var(--border-color)', width: 36, height: 36, minWidth: 36 }}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
               <path

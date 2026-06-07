@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-6 text-center">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center px-6 text-center">
       <p
         className="text-[#F28500] text-9xl font-black leading-none"
         style={{ fontFamily: 'Impact, "Arial Black", sans-serif' }}

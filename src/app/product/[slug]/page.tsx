@@ -27,14 +27,14 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] animate-pulse">
+      <div className="min-h-screen bg-[var(--bg-primary)] animate-pulse">
         {/* Image placeholder */}
-        <div className="w-full h-56" style={{ background: '#1A1A1A' }} />
+        <div className="w-full h-56" style={{ background: 'var(--bg-secondary)' }} />
         <div className="px-4 pt-6 pb-32 max-w-lg mx-auto">
-          <div className="h-7 rounded-xl w-2/3 mb-3" style={{ background: '#2A2A2A' }} />
+          <div className="h-7 rounded-xl w-2/3 mb-3" style={{ background: 'var(--bg-card-hover)' }} />
           <div className="h-4 rounded-lg w-full mb-2" style={{ background: '#222' }} />
           <div className="h-4 rounded-lg w-4/5" style={{ background: '#222' }} />
-          <div className="h-9 rounded-xl w-1/3 mt-4" style={{ background: '#2A2A2A' }} />
+          <div className="h-9 rounded-xl w-1/3 mt-4" style={{ background: 'var(--bg-card-hover)' }} />
         </div>
       </div>
     )
@@ -43,7 +43,7 @@ export default function ProductPage() {
   if (!producto) return notFound()
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <div className="relative z-50">
         <NavComponent />
       </div>

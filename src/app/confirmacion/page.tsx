@@ -10,10 +10,10 @@ function ConfirmacionContent() {
   const total = params.get('total')
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center px-4">
       <div
         className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
-        style={{ background: '#1A1A1A' }}
+        style={{ background: 'var(--bg-secondary)' }}
       >
       </div>
 
@@ -62,7 +62,7 @@ function ConfirmacionContent() {
 
 export default function ConfirmacionPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[var(--bg-primary)]" />}>
       <ConfirmacionContent />
     </Suspense>
   )

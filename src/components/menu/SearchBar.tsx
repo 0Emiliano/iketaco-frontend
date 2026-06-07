@@ -33,7 +33,8 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Buscar en el menú..."
-        className="w-full bg-[#2A2A2A] text-white placeholder-gray-500 rounded-full py-3 pl-12 pr-4 text-base outline-none border-2 border-transparent focus:border-[#F28500] transition-colors"
+        className="w-full bg-[var(--bg-secondary)] placeholder-gray-400 rounded-full py-3 pl-12 pr-4 text-base outline-none border-2 border-transparent focus:border-[#F28500] transition-colors"
+        style={{ color: 'var(--text-primary)' }}
         aria-label="Buscar productos"
       />
 

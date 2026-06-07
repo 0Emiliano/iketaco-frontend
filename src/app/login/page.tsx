@@ -90,7 +90,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center px-4 py-12">
+    <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center px-4 py-12">
 
       {/* Ambient glow */}
       <div

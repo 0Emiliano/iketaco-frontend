@@ -392,7 +392,7 @@ function TransferenciaContent() {
 
 export default function TransferenciaPage() {
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-white">
       <NavComponent title="Pago por Transferencia" />
       <Suspense
         fallback={

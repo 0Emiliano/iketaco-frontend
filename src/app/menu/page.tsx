@@ -47,7 +47,7 @@ export default function MenuPage() {
   const mostrandoCombos = activaCategoriaId === CATEGORIA_COMBOS_ID
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       <NavComponent title="Menú" />
 
       <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
@@ -78,7 +78,7 @@ export default function MenuPage() {
           <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-              style={{ background: '#1A1A1A' }}
+              style={{ background: 'var(--bg-secondary)' }}
             ></div>
             <p className="text-white font-extrabold text-lg mb-1">No pudimos cargar el menú</p>
             <p className="text-gray-400 text-sm font-medium mb-5">

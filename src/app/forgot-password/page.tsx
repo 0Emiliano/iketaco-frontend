@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-white flex flex-col">
       <header className="px-4 py-4 border-b border-white/10">
         <div className="max-w-lg mx-auto">
           <Link href="/login" className="text-xs text-white/70 hover:text-white transition">
@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
                   required
-                  className="w-full rounded-xl border border-white/20 bg-[#0A0A0A] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
+                  className="w-full rounded-xl border border-white/20 bg-[var(--bg-primary)] px-3 py-3 text-sm text-white focus:border-orange-500 focus:outline-none"
                   placeholder="tunombre@correo.com"
                 />
               </div>

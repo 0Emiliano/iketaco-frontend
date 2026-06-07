@@ -61,7 +61,7 @@ function Field({
       <input
         id={id} type={type} value={value} onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder} maxLength={maxLength}
-        className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition"
+        className="w-full rounded-xl border bg-[var(--bg-primary)] px-3 py-2.5 text-sm text-white focus:outline-none transition"
         style={{ borderColor: error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)' }}
         onFocus={(e)  => (e.currentTarget.style.borderColor = '#F28500')}
         onBlur={(e)   => (e.currentTarget.style.borderColor = error ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.15)')}

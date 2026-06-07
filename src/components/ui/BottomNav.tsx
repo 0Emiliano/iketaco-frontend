@@ -85,10 +85,11 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 max-w-lg mx-auto"
       style={{
-        background: 'linear-gradient(to top, #0D0D0D 0%, rgba(13,13,13,0.97) 100%)',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        backgroundColor: 'var(--bg-primary)',
+        borderTop: '1px solid var(--border-color)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 -4px 24px var(--bottom-nav-shadow)',
       }}
     >
       <div className="flex items-center justify-around px-2 pb-safe">
@@ -115,12 +116,13 @@ export default function BottomNav() {
                 {/* Cart badge */}
                 {isCart && totalItems > 0 && (
                   <span
-                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-white font-black"
+                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-black"
                     style={{
                       fontSize: '10px',
                       background: '#F28500',
+                      color: '#ffffff',
                       padding: '0 4px',
-                      boxShadow: '0 0 0 2px #0D0D0D',
+                      boxShadow: '0 0 0 2px var(--bg-primary)',
                     }}
                   >
                     {totalItems > 99 ? '99+' : totalItems}

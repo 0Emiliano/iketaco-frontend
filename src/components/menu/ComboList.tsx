@@ -34,7 +34,7 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
       <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-          style={{ background: '#1A1A1A' }}
+          style={{ background: 'var(--bg-secondary)' }}
         >
         </div>
         <p className="text-white font-extrabold text-lg mb-1">Sin resultados</p>
@@ -50,17 +50,17 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
           key={combo.id}
           className="rounded-2xl p-3 animate-slide-up"
           style={{
-            background: '#1A1A1A',
+            background: 'var(--bg-secondary)',
             animationDelay: `${index * 0.07}s`,
             boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-            border: '1px solid rgba(255,255,255,0.04)',
+            border: '1px solid var(--border-color)',
           }}
         >
           <div className="flex items-center gap-4">
             {/* Imagen */}
             <div
               className="w-24 h-24 rounded-xl flex-shrink-0 flex items-center justify-center text-4xl"
-              style={{ background: '#2A2A2A' }}
+              style={{ background: 'var(--bg-card-hover)' }}
             >
               {combo.imagen_url ? (
                 <img
@@ -86,7 +86,7 @@ export default function ComboList({ combos = [], search }: ComboListProps) {
           {/* Cantidad + Agregar */}
           <div
             className="flex items-center justify-between mt-3 pt-3"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+            style={{ borderTop: '1px solid var(--border-color)' }}
           >
             <div className="flex items-center gap-3">
               <button

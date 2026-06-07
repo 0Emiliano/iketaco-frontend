@@ -22,7 +22,7 @@ export default function ProductList({ productos = [], categoriaId, search }: Pro
       <div className="flex flex-col items-center justify-center py-16 text-center animate-fade-in">
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4"
-          style={{ background: '#1A1A1A' }}
+          style={{ background: 'var(--bg-secondary)' }}
         >
         </div>
         <p className="text-white font-extrabold text-lg mb-1">Sin resultados</p>

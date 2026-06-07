@@ -37,8 +37,8 @@ export default function CategoryFilter({ categorias = [], activa, onChange }: Ca
           onClick={() => onChange(null)}
           className="flex-shrink-0 px-4 py-2 rounded-full font-extrabold text-sm transition-all active:scale-95"
           style={{
-            background: activa === null ? '#F28500' : '#1A1A1A',
-            color: activa === null ? 'white' : '#9CA3AF',
+            background: activa === null ? '#F28500' : 'var(--bg-secondary)',
+            color: activa === null ? 'white' : 'var(--text-secondary)',
             boxShadow: activa === null ? '0 2px 12px rgba(242,133,0,0.4)' : 'none',
           }}
         >
@@ -51,7 +51,7 @@ export default function CategoryFilter({ categorias = [], activa, onChange }: Ca
             onClick={() => onChange(cat.id)}
             className="flex-shrink-0 px-4 py-2 rounded-full font-extrabold text-sm transition-all active:scale-95"
             style={{
-              background: activa === cat.id ? '#F28500' : '#1A1A1A',
+              background: activa === cat.id ? '#F28500' : 'var(--bg-secondary)',
               color: activa === cat.id ? 'white' : '#9CA3AF',
               boxShadow: activa === cat.id ? '0 2px 12px rgba(242,133,0,0.4)' : 'none',
             }}
@@ -65,7 +65,7 @@ export default function CategoryFilter({ categorias = [], activa, onChange }: Ca
       <div
         className="absolute top-0 right-0 h-full w-12 pointer-events-none transition-opacity duration-300"
         style={{
-          background: 'linear-gradient(to right, transparent, #0A0A0A)',
+          background: 'linear-gradient(to right, transparent, var(--bg-primary))',
           opacity: showFade ? 1 : 0,
         }}
       />

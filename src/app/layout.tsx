@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Bebas_Neue, Nunito } from 'next/font/google'
 import './globals.css'
 import { CartProvider } from '@/context/CartContext'
+import { ThemeProvider } from '@/context/ThemeContext'
 import BottomNav from '@/components/ui/BottomNav'
 import Toaster from '@/components/ui/Toaster'
 import PageTransition from '@/components/ui/PageTransition'
@@ -38,16 +39,18 @@ export const viewport: Viewport = {
 // ─── Root Layout ──────────────────────────────────────────────────────────────
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${bebasNeue.variable} ${nunito.variable}`}>
+    <html lang="es" data-theme="light" className={`${bebasNeue.variable} ${nunito.variable}`}>
       <head />
       <body>
-        <CartProvider>
-          <div className="min-h-screen bg-[#0A0A0A] font-body">
-            <PageTransition>{children}</PageTransition>
-            <BottomNav />
-            <Toaster />
-          </div>
-        </CartProvider>
+        <ThemeProvider>
+          <CartProvider>
+            <div className="min-h-screen font-body" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+              <PageTransition>{children}</PageTransition>
+              <BottomNav />
+              <Toaster />
+            </div>
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

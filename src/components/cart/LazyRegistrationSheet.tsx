@@ -94,7 +94,7 @@ export default function LazyRegistrationSheet({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@correo.com"
-              className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition"
+              className="w-full rounded-xl border bg-[var(--bg-primary)] px-3 py-2.5 text-sm text-white focus:outline-none transition"
               style={{ borderColor: 'rgba(255,255,255,0.15)' }}
               onFocus={(e)  => (e.currentTarget.style.borderColor = '#F28500')}
               onBlur={(e)   => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)')}
@@ -107,7 +107,7 @@ export default function LazyRegistrationSheet({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 6 caracteres"
-              className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white focus:outline-none transition"
+              className="w-full rounded-xl border bg-[var(--bg-primary)] px-3 py-2.5 text-sm text-white focus:outline-none transition"
               style={{ borderColor: 'rgba(255,255,255,0.15)' }}
               onFocus={(e)  => (e.currentTarget.style.borderColor = '#F28500')}
               onBlur={(e)   => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)')}

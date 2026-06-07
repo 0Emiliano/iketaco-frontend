@@ -42,16 +42,16 @@ export default function PopularSection() {
             href={`/product/${producto.id}`}
             className="flex items-center gap-4 rounded-2xl p-3 transition-all duration-200 hover:scale-[1.01] active:scale-[0.98] group animate-slide-up"
             style={{
-              background: '#1A1A1A',
+              background: 'var(--bg-secondary)',
               animationDelay: `${0.2 + i * 0.08}s`,
               boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.04)',
+              border: '1px solid var(--border-color)',
             }}
           >
             {/* Imagen */}
             <div
               className="w-20 h-20 rounded-xl flex-shrink-0 flex items-center justify-center text-4xl"
-              style={{ background: '#2A2A2A' }}
+              style={{ background: 'var(--bg-card-hover)' }}
             >
               {producto.imagen_url ? (
                 <img
