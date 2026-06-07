@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/context/CartContext'
-import LogoIcon from './LogoIcon'
+import BullLogo from './BullLogo'
 import ThemeToggle from './ThemeToggle'
 import apiClient from '@/lib/api/client'
 
@@ -54,12 +54,7 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform"
-            style={{ background: 'rgba(0,0,0,0.35)' }}
-          >
-            <LogoIcon size={30} />
-          </div>
+          <BullLogo size={44} />
           <span
             className="text-white font-display tracking-wider text-xl"
             style={{ letterSpacing: '0.06em' }}
