@@ -53,10 +53,10 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
         style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
       >
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <BullLogo size={44} />
+        <Link href="/" className="flex items-center gap-2 group">
+          <BullLogo size={52} />
           <span
-            className="text-white font-display tracking-wider text-xl"
+            className="text-white font-display tracking-wider text-xl leading-none self-center whitespace-nowrap"
             style={{ letterSpacing: '0.06em' }}
           >
             {title}
