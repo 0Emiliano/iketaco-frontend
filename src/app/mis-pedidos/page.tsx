@@ -55,11 +55,11 @@ type EditItem =
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pendiente:      { label: 'Pendiente',  color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
-  en_preparacion: { label: 'Preparando', color: '#F28500', bg: 'rgba(242,133,0,0.15)'  },
-  lista:          { label: 'Lista',      color: '#27AE60', bg: 'rgba(39,174,96,0.15)'  },
-  entregada:      { label: 'Entregada',  color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
-  cancelada:      { label: 'Cancelada',  color: '#E74C3C', bg: 'rgba(231,76,60,0.15)'  },
+  pendiente: { label: 'Pendiente', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
+  en_preparacion: { label: 'Preparando', color: '#F28500', bg: 'rgba(242,133,0,0.15)' },
+  lista: { label: 'Lista', color: '#27AE60', bg: 'rgba(39,174,96,0.15)' },
+  entregada: { label: 'Entregada', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' },
+  cancelada: { label: 'Cancelada', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' },
 }
 
 // ─── Quantity stepper ─────────────────────────────────────────────────────────
@@ -87,9 +87,7 @@ function Stepper({
       >
         −
       </button>
-      <span
-        className="w-8 text-center text-sm font-extrabold text-white tabular-nums"
-      >
+      <span className="w-8 text-center text-sm font-extrabold text-white tabular-nums">
         {value}
       </span>
       <button
@@ -145,7 +143,9 @@ function EditModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
     >
       {/* Sheet */}
       <div
@@ -191,9 +191,7 @@ function EditModal({
                 key={index}
                 className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3 transition"
                 style={{
-                  background: isRemoved
-                    ? 'rgba(231,76,60,0.06)'
-                    : 'rgba(255,255,255,0.04)',
+                  background: isRemoved ? 'rgba(231,76,60,0.06)' : 'rgba(255,255,255,0.04)',
                   border: isRemoved
                     ? '1px solid rgba(231,76,60,0.2)'
                     : '1px solid var(--border-color)',
@@ -214,11 +212,7 @@ function EditModal({
                     )}
                   </p>
                 </div>
-                <Stepper
-                  value={item.cantidad}
-                  onChange={(v) => updateCantidad(index, v)}
-                  min={0}
-                />
+                <Stepper value={item.cantidad} onChange={(v) => updateCantidad(index, v)} min={0} />
               </div>
             )
           })}
@@ -226,7 +220,10 @@ function EditModal({
 
         {/* Warning if all items removed */}
         {activeItems.length === 0 && (
-          <div className="mx-5 mb-3 rounded-2xl px-4 py-3" style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.25)' }}>
+          <div
+            className="mx-5 mb-3 rounded-2xl px-4 py-3"
+            style={{ background: 'rgba(231,76,60,0.1)', border: '1px solid rgba(231,76,60,0.25)' }}
+          >
             <p className="text-xs text-red-300 font-semibold text-center">
               Debes mantener al menos un ítem en el pedido
             </p>
@@ -280,16 +277,16 @@ function EditModal({
 export default function MisPedidosPage() {
   const router = useRouter()
 
-  const [ordenes, setOrdenes]       = useState<OrdenHistorial[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [error, setError]           = useState('')
+  const [ordenes, setOrdenes] = useState<OrdenHistorial[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [noLogueado, setNoLogueado] = useState(false)
 
   // Modal state
-  const [modalOrden, setModalOrden]   = useState<OrdenHistorial | null>(null)
-  const [editItems, setEditItems]     = useState<EditItem[]>([])
-  const [saving, setSaving]           = useState(false)
-  const [modalError, setModalError]   = useState('')
+  const [modalOrden, setModalOrden] = useState<OrdenHistorial | null>(null)
+  const [editItems, setEditItems] = useState<EditItem[]>([])
+  const [saving, setSaving] = useState(false)
+  const [modalError, setModalError] = useState('')
 
   const fetchOrdenes = useCallback(() => {
     const token = localStorage.getItem('accessToken')
@@ -357,9 +354,7 @@ export default function MisPedidosPage() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       // Patch the local list with the updated order
-      setOrdenes((prev) =>
-        prev.map((o) => (o.id === modalOrden.id ? { ...o, ...res.data } : o))
-      )
+      setOrdenes((prev) => prev.map((o) => (o.id === modalOrden.id ? { ...o, ...res.data } : o)))
       setModalOrden(null)
     } catch (err: any) {
       const msg = err?.response?.data?.error ?? err?.response?.data?.message
@@ -403,27 +398,51 @@ export default function MisPedidosPage() {
         <NavComponent title="Mis Pedidos" />
         <main className="px-4 pt-20 pb-28 max-w-lg mx-auto w-full">
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-0">
-
             {/* Guest illustration */}
             <div className="relative mb-6">
               <div
                 className="w-28 h-28 rounded-full flex items-center justify-center"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                }}
               >
-                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4B5563" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  width="52"
+                  height="52"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#4B5563"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
               {/* Guest badge */}
               <span
                 className="absolute -bottom-1 -right-1 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(156,163,175,0.25)', color: '#9CA3AF' }}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid rgba(156,163,175,0.25)',
+                  color: '#9CA3AF',
+                }}
               >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
                 Invitado
               </span>
@@ -433,16 +452,21 @@ export default function MisPedidosPage() {
               MODO INVITADO
             </h2>
             <p className="text-gray-400 font-medium text-sm max-w-xs mb-2">
-              Estás navegando sin cuenta. Puedes hacer pedidos, pero para ver tu historial necesitas iniciar sesión.
+              Estás navegando sin cuenta. Puedes hacer pedidos, pero para ver tu historial necesitas
+              iniciar sesión.
             </p>
 
             {/* Tip */}
             <div
               className="w-full max-w-xs rounded-2xl px-4 py-3 mb-6 text-left"
-              style={{ background: 'rgba(242,133,0,0.07)', border: '1px solid rgba(242,133,0,0.2)' }}
+              style={{
+                background: 'rgba(242,133,0,0.07)',
+                border: '1px solid rgba(242,133,0,0.2)',
+              }}
             >
               <p className="text-orange-300 text-xs font-semibold leading-snug">
-                💡 Si ya hiciste un pedido como invitado, puedes crear una cuenta ahora y tu historial quedará vinculado a tu correo.
+                Si ya hiciste un pedido como invitado, puedes crear una cuenta ahora y tu historial
+                quedará vinculado a tu correo.
               </p>
             </div>
 
@@ -450,14 +474,21 @@ export default function MisPedidosPage() {
               <Link
                 href="/login"
                 className="w-full py-4 rounded-2xl text-white font-extrabold text-lg text-center transition-all active:scale-95"
-                style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)', boxShadow: '0 4px 14px rgba(242,133,0,0.3)' }}
+                style={{
+                  background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)',
+                  boxShadow: '0 4px 14px rgba(242,133,0,0.3)',
+                }}
               >
                 Iniciar sesión
               </Link>
               <Link
                 href="/register"
                 className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
-                style={{ background: 'var(--border-color)', color: '#F28500', border: '1px solid rgba(242,133,0,0.2)' }}
+                style={{
+                  background: 'var(--border-color)',
+                  color: '#F28500',
+                  border: '1px solid rgba(242,133,0,0.2)',
+                }}
               >
                 Crear cuenta
               </Link>
@@ -488,8 +519,7 @@ export default function MisPedidosPage() {
             <div
               className="w-24 h-24 rounded-full flex items-center justify-center mb-5"
               style={{ background: 'var(--bg-secondary)' }}
-            >
-            </div>
+            ></div>
             <h2 className="text-white font-display mb-2" style={{ fontSize: '2rem' }}>
               SIN PEDIDOS
             </h2>
@@ -510,9 +540,7 @@ export default function MisPedidosPage() {
 
             {ordenes.map((orden, index) => {
               // ── Detección de estado de transferencia ────────────────────────
-              const pagoTransferencia = orden.pagos?.find(
-                (p) => p.metodo_pago_id === 3
-              )
+              const pagoTransferencia = orden.pagos?.find((p) => p.metodo_pago_id === 3)
 
               // Cajero registró transferencia pero cliente aún no sube comprobante
               const necesitaTransferencia =
@@ -529,15 +557,16 @@ export default function MisPedidosPage() {
               // Comprobante rechazado por el cajero (vía flag o vía notas)
               const comprobanteRechazado =
                 (pagoTransferencia !== undefined && pagoTransferencia.confirmado === false) ||
-                (orden.estado === 'pendiente' && !!orden.notas_orden?.includes('Comprobante rechazado'))
+                (orden.estado === 'pendiente' &&
+                  !!orden.notas_orden?.includes('Comprobante rechazado'))
 
               const estadoConfig = comprobanteRechazado
                 ? { label: 'Comprobante rechazado', color: '#E74C3C', bg: 'rgba(231,76,60,0.15)' }
                 : comprobanteEnRevision
-                ? { label: 'En revisión', color: '#F28500', bg: 'rgba(242,133,0,0.15)' }
-                : necesitaTransferencia
-                ? { label: 'Pago pendiente', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' }
-                : ESTADO_CONFIG[orden.estado] ?? ESTADO_CONFIG['pendiente']
+                  ? { label: 'En revisión', color: '#F28500', bg: 'rgba(242,133,0,0.15)' }
+                  : necesitaTransferencia
+                    ? { label: 'Pago pendiente', color: '#2980B9', bg: 'rgba(41,128,185,0.15)' }
+                    : (ESTADO_CONFIG[orden.estado] ?? ESTADO_CONFIG['pendiente'])
 
               // Solo mostrar botón Modificar en pendiente sin transferencia en curso
               const esPendiente =
@@ -606,16 +635,27 @@ export default function MisPedidosPage() {
                       }}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#93C5FD"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="flex-shrink-0"
+                        >
+                          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                          <line x1="1" y1="10" x2="23" y2="10" />
                         </svg>
                         <p className="text-blue-300 font-extrabold text-sm">
                           Pago por transferencia requerido
                         </p>
                       </div>
                       <p className="text-gray-400 text-xs mb-2">
-                        El cajero registró tu pedido con pago por transferencia.
-                        Realiza la transferencia y sube tu comprobante.
+                        El cajero registró tu pedido con pago por transferencia. Realiza la
+                        transferencia y sube tu comprobante.
                       </p>
                       <p className="text-white text-sm font-extrabold mb-3">
                         Monto: ${parseFloat(pagoTransferencia!.monto).toFixed(2)}
@@ -629,8 +669,18 @@ export default function MisPedidosPage() {
                         className="w-full py-2.5 rounded-xl text-white font-extrabold text-sm transition active:scale-95 flex items-center justify-center gap-2"
                         style={{ background: 'linear-gradient(135deg, #2980B9 0%, #1A5276 100%)' }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="9 11 12 14 22 4" />
+                          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                         </svg>
                         Ir a pagar por transferencia
                       </button>
@@ -647,8 +697,19 @@ export default function MisPedidosPage() {
                       }}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FDBA74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#FDBA74"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="flex-shrink-0"
+                        >
+                          <circle cx="12" cy="12" r="10" />
+                          <polyline points="12 6 12 12 16 14" />
                         </svg>
                         <p className="text-orange-300 font-extrabold text-sm">
                           Comprobante en revisión
@@ -670,8 +731,20 @@ export default function MisPedidosPage() {
                       }}
                     >
                       <div className="flex items-center gap-2 mb-1">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#FCA5A5"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="flex-shrink-0"
+                        >
+                          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                          <line x1="12" y1="9" x2="12" y2="13" />
+                          <line x1="12" y1="17" x2="12.01" y2="17" />
                         </svg>
                         <p className="text-red-300 text-sm font-bold">
                           Tu comprobante fue rechazado
@@ -691,8 +764,19 @@ export default function MisPedidosPage() {
                         className="w-full py-2 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-2"
                         style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
                       >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                        <svg
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
                         Subir nuevo comprobante
                       </button>
