@@ -493,9 +493,16 @@ export default function MisPedidosPage() {
                 Crear cuenta
               </Link>
               <Link
-                href="/menu"
+                href="/mis-pedidos-guest"
                 className="w-full py-3 rounded-2xl font-bold text-sm text-center transition-all active:scale-95"
                 style={{ color: '#6B7280' }}
+              >
+                Buscar pedido como invitado →
+              </Link>
+              <Link
+                href="/menu"
+                className="w-full py-2 rounded-2xl font-medium text-xs text-center transition-all active:scale-95"
+                style={{ color: '#4B5563' }}
               >
                 Continuar sin cuenta →
               </Link>
