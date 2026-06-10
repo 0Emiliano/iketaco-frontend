@@ -109,10 +109,11 @@ export default async function HeroBanner() {
           </div>
 
           <h2
-            className="text-white font-display leading-tight"
+            className="font-display leading-tight"
             style={{
               fontSize: 'clamp(2rem, 8vw, 2.75rem)',
               textShadow: '0 3px 16px rgba(0,0,0,0.8)',
+              color: '#ffffff',
             }}
           >
             {titulo}

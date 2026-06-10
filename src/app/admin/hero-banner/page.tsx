@@ -117,8 +117,8 @@ function BannerPreview({ config, promo }: { config: BannerConfig; promo: Promoci
             )}
           </div>
           <h2
-            className="text-white font-extrabold leading-tight"
-            style={{ fontSize: 'clamp(1.5rem, 7vw, 2.25rem)', textShadow: '0 3px 16px rgba(0,0,0,0.8)' }}
+            className="font-extrabold leading-tight"
+            style={{ fontSize: 'clamp(1.5rem, 7vw, 2.25rem)', textShadow: '0 3px 16px rgba(0,0,0,0.8)', color: '#ffffff' }}
           >
             {titulo}
           </h2>
