@@ -88,6 +88,8 @@ export default function OrderSummary() {
   // Auth state — guest checkout is allowed; token is optional
   const [isGuest, setIsGuest] = useState(false)
   const [guestNombre, setGuestNombre] = useState('')
+  const [emailGuest, setEmailGuest] = useState('')
+  const [continuarComoGuest, setContinuarComoGuest] = useState(false)
 
   // Lazy registration sheet
   const [lazyReg, setLazyReg] = useState<{ numero: string; total: string } | null>(null)
@@ -201,9 +203,12 @@ export default function OrderSummary() {
         .filter((i) => i.tipo === 'combo')
         .map((i) => ({ comboId: i.tipo === 'combo' ? i.combo.id : 0, cantidad: i.quantity }))
 
-      const body: OrdenRequest = {
+      const esGuest = isGuest && continuarComoGuest
+
+      const body: OrdenRequest & { emailGuest?: string } = {
         tipoServicio, productos, combos,
         ...(guestNombre.trim() && { nombreCliente: guestNombre.trim() }),
+        ...(esGuest && emailGuest.trim() && { emailGuest: emailGuest.trim() }),
         ...(esDomicilio && {
           direccionEntrega: direccionTexto.trim(),
           telefonoCliente:  telefono.trim(),
@@ -221,11 +226,11 @@ export default function OrderSummary() {
       const ordenRes = await apiClient.post('/orders', body, { headers })
       const orden = ordenRes.data
 
-      // 2a. Efectivo — guest sees lazy registration before redirect
+      // 2a. Efectivo
       if (metodoPago === 'efectivo') {
         clearCart()
-        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}`
-        if (!token) {
+        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}${esGuest ? '&guest=true' : ''}`
+        if (!token && !esGuest) {
           setConfirmUrl(url)
           setLazyReg({ numero: orden.numero, total: orden.total })
         } else {
@@ -234,12 +239,16 @@ export default function OrderSummary() {
         return
       }
 
-      // 2b. Transferencia — requires a token (payment record needs user)
+      // 2b. Transferencia — guest skips payment, goes straight to confirmacion
       if (!token) {
         clearCart()
-        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}`
-        setConfirmUrl(url)
-        setLazyReg({ numero: orden.numero, total: orden.total })
+        const url = `/confirmacion?orden=${orden.numero}&total=${orden.total}${esGuest ? '&guest=true' : ''}`
+        if (esGuest) {
+          router.push(url)
+        } else {
+          setConfirmUrl(url)
+          setLazyReg({ numero: orden.numero, total: orden.total })
+        }
         return
       }
 
@@ -456,33 +465,80 @@ export default function OrderSummary() {
         )}
       </div>
 
-      {/* ── Guest name field ── */}
-      {isGuest && (
+      {/* ── Guest flow ── */}
+      {isGuest && !continuarComoGuest && (
+        <div
+          className="rounded-2xl p-4 mb-4"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', animation: 'fadeSlideDown 0.2s ease both' }}
+        >
+          <p className="text-white font-extrabold text-base mb-3">¿Cómo quieres continuar?</p>
+
+          <div className="flex flex-col gap-2 mb-3">
+            <Link
+              href="/login"
+              className="w-full py-2.5 rounded-xl text-white font-extrabold text-sm text-center transition-all active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+            >
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/register"
+              className="w-full py-2.5 rounded-xl font-extrabold text-sm text-center transition-all active:scale-95"
+              style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+            >
+              Crear cuenta
+            </Link>
+          </div>
+
+          <div className="h-px mb-3" style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+          <p className="text-gray-400 text-xs font-bold mb-2">O continúa sin cuenta:</p>
+          <input
+            type="email"
+            value={emailGuest}
+            onChange={(e) => setEmailGuest(e.target.value)}
+            placeholder="tu@email.com (opcional, para seguimiento)"
+            className="w-full rounded-xl border bg-[#0A0A0A] px-3 py-2.5 text-sm text-white mb-2 focus:outline-none"
+            style={{ borderColor: 'rgba(255,255,255,0.15)' }}
+          />
+          <button
+            onClick={() => setContinuarComoGuest(true)}
+            className="w-full py-2.5 rounded-xl text-gray-300 font-extrabold text-sm transition-all active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
+          >
+            Continuar como invitado →
+          </button>
+        </div>
+      )}
+
+      {isGuest && continuarComoGuest && (
         <div
           className="rounded-2xl p-4 mb-4 flex flex-col gap-3"
           style={{ background: '#151515', border: '1px solid rgba(255,255,255,0.06)', animation: 'fadeSlideDown 0.2s ease both' }}
         >
           <div className="flex items-center justify-between">
-            <p className="text-white font-extrabold text-sm">Tu nombre (opcional)</p>
-            <div className="flex gap-2">
-              <Link
-                href="/login"
-                className="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
-                style={{ background: 'rgba(242,133,0,0.12)', color: '#F28500', border: '1px solid rgba(242,133,0,0.3)' }}
-              >
-                Iniciar sesión
-              </Link>
-            </div>
+            <p className="text-white font-extrabold text-sm">Pedido como invitado</p>
+            <button
+              onClick={() => setContinuarComoGuest(false)}
+              className="text-xs font-bold px-2.5 py-1 rounded-lg transition-all active:scale-95"
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#9CA3AF' }}
+            >
+              Cambiar
+            </button>
           </div>
           <Field
             id="guestNombre"
-            label=""
+            label="Tu nombre (opcional)"
             value={guestNombre}
             onChange={setGuestNombre}
             placeholder="Ej: Juan García"
             maxLength={100}
           />
-          <p className="text-xs text-gray-500 -mt-1">Puedes pedir sin cuenta. Al finalizar te ofrecemos guardar tu historial.</p>
+          {emailGuest.trim() && (
+            <p className="text-xs font-medium -mt-1" style={{ color: '#27AE60' }}>
+              ✓ Se enviará seguimiento a {emailGuest.trim()}
+            </p>
+          )}
         </div>
       )}
 
@@ -504,7 +560,7 @@ export default function OrderSummary() {
       {/* ── Botón principal ── */}
       <button
         onClick={handleOrder}
-        disabled={loading}
+        disabled={loading || (isGuest && !continuarComoGuest)}
         className="w-full py-5 rounded-2xl text-white font-extrabold text-lg transition-all active:scale-95 hover:opacity-90 disabled:opacity-50"
         style={{
           background: metodoPago === 'transferencia'

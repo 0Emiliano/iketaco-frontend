@@ -77,7 +77,7 @@ export default function BottomNav() {
   const pathname = usePathname()
   const { totalItems } = useCart()
 
-  const HIDDEN_PATHS = ['/confirmacion', '/login', '/cocina', '/admin', '/cajero', '/mesero', '/transferencia', '/repartidor']
+  const HIDDEN_PATHS = ['/confirmacion', '/login', '/cocina', '/admin', '/cajero', '/mesero', '/transferencia', '/repartidor', '/pedido/', '/mis-pedidos-guest']
   if (HIDDEN_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/')))
     return null
 

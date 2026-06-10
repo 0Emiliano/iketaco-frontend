@@ -2,12 +2,15 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 
 function ConfirmacionContent() {
   const params = useSearchParams()
-  const orden = params.get('orden')
+  const numeroOrden = params.get('orden')
   const total = params.get('total')
+  const esGuest = params.get('guest') === 'true'
+
+  const [copied, setCopied] = useState(false)
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col items-center justify-center px-4">
@@ -21,11 +24,11 @@ function ConfirmacionContent() {
         ¡PEDIDO ENVIADO!
       </h1>
 
-      {orden && (
+      {numeroOrden && (
         <p className="text-gray-400 text-sm font-bold mb-1">
           Número de orden:{' '}
           <span style={{ color: '#F28500' }}>
-            {orden ? orden.replace(/ORD-\d{8}-/, 'ORD-') : ''}
+            {numeroOrden.replace(/ORD-\d{8}-/, 'ORD-')}
           </span>
         </p>
       )}
@@ -40,22 +43,73 @@ function ConfirmacionContent() {
         Tu pedido está siendo preparado
       </p>
 
-      <div className="flex flex-col gap-3 w-full max-w-xs">
-        <Link
-          href="/mis-pedidos"
-          className="w-full py-4 rounded-2xl text-white font-extrabold text-lg text-center transition-all active:scale-95 hover:opacity-90"
-          style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+      {/* ── Guest: save order number section ── */}
+      {esGuest && numeroOrden ? (
+        <div
+          className="mt-4 rounded-2xl p-4 w-full max-w-xs mb-4"
+          style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.08)' }}
         >
-          Ver mis pedidos
-        </Link>
-        <Link
-          href="/menu"
-          className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
-          style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
-        >
-          Volver al Menú
-        </Link>
-      </div>
+          <p className="text-white font-extrabold text-sm mb-1 text-center">
+            Guarda tu número de orden
+          </p>
+          <p
+            className="font-display text-xl text-center mb-3"
+            style={{ color: '#F28500' }}
+          >
+            {numeroOrden}
+          </p>
+          <p className="text-gray-400 text-xs text-center mb-3">
+            Úsalo para consultar el estado de tu pedido en cualquier momento
+          </p>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(numeroOrden ?? '')
+              setCopied(true)
+              setTimeout(() => setCopied(false), 2000)
+            }}
+            className="w-full py-2 rounded-xl text-white font-extrabold text-sm mb-2 transition-all active:scale-95"
+            style={{ background: copied ? '#27AE60' : 'rgba(255,255,255,0.08)' }}
+          >
+            {copied ? '✓ Copiado' : 'Copiar número'}
+          </button>
+          <Link
+            href={`/pedido/${numeroOrden}`}
+            className="w-full py-2 rounded-xl text-white font-extrabold text-sm text-center block transition-all active:scale-95"
+            style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+          >
+            Seguir mi pedido →
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <Link
+            href="/mis-pedidos"
+            className="w-full py-4 rounded-2xl text-white font-extrabold text-lg text-center transition-all active:scale-95 hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #F28500 0%, #D4700A 100%)' }}
+          >
+            Ver mis pedidos
+          </Link>
+          <Link
+            href="/menu"
+            className="w-full py-4 rounded-2xl font-extrabold text-lg text-center transition-all active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+          >
+            Volver al Menú
+          </Link>
+        </div>
+      )}
+
+      {esGuest && (
+        <div className="mt-4 flex flex-col gap-2 w-full max-w-xs">
+          <Link
+            href="/menu"
+            className="w-full py-3 rounded-2xl font-extrabold text-sm text-center transition-all active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.08)', color: '#F28500' }}
+          >
+            Volver al Menú
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
