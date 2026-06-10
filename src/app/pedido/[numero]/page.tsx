@@ -222,7 +222,9 @@ export default function PedidoTrackingPage() {
           <h1 className="text-white font-extrabold text-base leading-none truncate">
             {orden.numero.replace(/ORD-\d{8}-/, 'ORD-')}
           </h1>
-          <p className="text-gray-500 text-xs mt-0.5">Seguimiento de pedido</p>
+          <p className="text-gray-500 text-xs mt-0.5">
+            {orden.nombre_cliente ? orden.nombre_cliente : 'Seguimiento de pedido'}
+          </p>
         </div>
         {/* Auto-refresh indicator */}
         {!ordenTerminada && (

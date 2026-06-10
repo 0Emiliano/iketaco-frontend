@@ -788,7 +788,16 @@ export default function MisPedidosPage() {
                     className="flex items-center justify-between pt-2 mt-3"
                     style={{ borderTop: '1px solid var(--border-color)' }}
                   >
-                    <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 text-xs">{formatFecha(orden.creado_en)}</span>
+                      <Link
+                        href={`/pedido/${orden.numero}`}
+                        className="text-xs font-bold transition-colors"
+                        style={{ color: '#6B7280' }}
+                      >
+                        Seguir →
+                      </Link>
+                    </div>
 
                     <div className="flex items-center gap-2">
                       {/* Ver en mapa — only for domicilio orders in-progress or ready */}
