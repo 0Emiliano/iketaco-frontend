@@ -201,7 +201,7 @@ function EditModal({
                 <div className="flex-1 min-w-0">
                   <p
                     className="text-sm font-bold truncate"
-                    style={{ color: isRemoved ? '#9CA3AF' : '#F3F4F6' }}
+                    style={{ color: isRemoved ? 'var(--text-secondary)' : 'var(--text-primary)' }}
                   >
                     {nombre}
                   </p>
@@ -244,7 +244,7 @@ function EditModal({
             onClick={onClose}
             disabled={saving}
             className="flex-1 py-3 rounded-2xl text-sm font-extrabold transition active:scale-95 disabled:opacity-50"
-            style={{ background: 'var(--border-color)', color: '#9CA3AF' }}
+            style={{ background: 'var(--border-color)', color: 'var(--text-secondary)' }}
           >
             Cancelar
           </button>
@@ -426,8 +426,8 @@ export default function MisPedidosPage() {
                 className="absolute -bottom-1 -right-1 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-black"
                 style={{
                   background: 'var(--bg-secondary)',
-                  border: '1px solid rgba(156,163,175,0.25)',
-                  color: '#9CA3AF',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-secondary)',
                 }}
               >
                 <svg
@@ -625,7 +625,7 @@ export default function MisPedidosPage() {
                   </div>
 
                   {/* Items summary */}
-                  <p className="text-gray-300 text-sm font-medium line-clamp-2 mb-2">
+                  <p className="text-sm font-medium line-clamp-2 mb-2" style={{ color: 'var(--text-primary)' }}>
                     {getResumen(orden)}
                   </p>
 
@@ -641,7 +641,7 @@ export default function MisPedidosPage() {
                         </span>
                       </div>
                       {orden.direccion_entrega && (
-                        <p className="text-xs font-medium pl-0.5" style={{ color: '#9CA3AF' }}>
+                        <p className="text-xs font-medium pl-0.5" style={{ color: 'var(--text-secondary)' }}>
                           {orden.direccion_entrega}
                         </p>
                       )}
@@ -672,7 +672,7 @@ export default function MisPedidosPage() {
                           <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                           <line x1="1" y1="10" x2="23" y2="10" />
                         </svg>
-                        <p className="text-blue-300 font-extrabold text-sm">
+                        <p className="font-extrabold text-sm" style={{ color: '#2980B9' }}>
                           Pago por transferencia requerido
                         </p>
                       </div>
