@@ -99,20 +99,6 @@ function BannerPreview({ config, promo }: { config: BannerConfig; promo: Promoci
         style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%)' }}
       />
       <div className="relative z-10 flex flex-col justify-between h-full p-5" style={{ minHeight: 220 }}>
-        <div className="flex items-center gap-2.5 self-start">
-          <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xl text-white font-extrabold text-xs"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
-          >
-            IKE
-          </div>
-          <div>
-            <p className="text-white leading-none tracking-wider font-extrabold text-lg">I KE TACOS</p>
-            <p className="text-xs font-extrabold tracking-widest uppercase" style={{ color: '#F28500' }}>
-              BIRRIA · AUTHENTIC
-            </p>
-          </div>
-        </div>
         <div className="flex flex-col gap-1 mt-auto">
           <div className="flex items-center gap-2 flex-wrap">
             <span
