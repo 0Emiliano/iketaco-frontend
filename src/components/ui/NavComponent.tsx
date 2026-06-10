@@ -71,7 +71,7 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
 
         <div className="flex items-center gap-2">
           {/* Theme toggle */}
-          <ThemeToggle />
+          <ThemeToggle background={btnBg} />
           {/* Auth */}
           {usuario ? (
             <div className="relative">

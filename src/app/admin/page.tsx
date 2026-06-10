@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/api/client'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 // Shapes reales del backend
 interface DashboardData {
@@ -394,7 +395,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center">
         <p className="text-gray-400 font-bold">Cargando panel...</p>
       </div>
     )
@@ -403,16 +404,16 @@ export default function AdminPage() {
   const servicioAbierto = servicio?.estado === 'abierto'
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Header */}
       <div
         className="fixed top-0 left-0 right-0 z-50 px-4 py-3 flex items-center justify-between"
-        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}
       >
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-white font-extrabold text-lg leading-none">Panel Gerente</h1>
-            <p className="text-gray-400 text-xs mt-0.5">{usuario?.email}</p>
+            <h1 className="font-extrabold text-lg leading-none" style={{ color: 'var(--text-primary)' }}>Panel Gerente</h1>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>{usuario?.email}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -425,10 +426,11 @@ export default function AdminPage() {
           >
             {servicioAbierto ? '● Abierto' : '● Cerrado'}
           </div>
+          <ThemeToggle />
           <button
             onClick={logout}
-            className="text-gray-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition"
-            style={{ background: 'rgba(255,255,255,0.06)' }}
+            className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
+            style={{ background: 'var(--border-color)', color: 'var(--text-secondary)' }}
           >
             Salir
           </button>
@@ -438,7 +440,7 @@ export default function AdminPage() {
       {/* Tabs */}
       <div
         className="fixed top-[57px] left-0 right-0 z-40 px-4 flex gap-1 pb-2 pt-2"
-        style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}
       >
         {(['dashboard', 'ordenes'] as Tab[]).map((t) => (
           <button
@@ -446,8 +448,8 @@ export default function AdminPage() {
             onClick={() => setTab(t)}
             className="px-4 py-2 rounded-xl text-sm font-bold transition-all"
             style={{
-              background: tab === t ? 'rgba(242,133,0,0.2)' : 'rgba(255,255,255,0.05)',
-              color: tab === t ? '#F28500' : '#9CA3AF',
+              background: tab === t ? 'rgba(242,133,0,0.2)' : 'var(--border-color)',
+              color: tab === t ? '#F28500' : 'var(--text-secondary)',
             }}
           >
             {t === 'dashboard' ? 'Dashboard' : 'Órdenes'}
@@ -462,7 +464,7 @@ export default function AdminPage() {
             {/* Service control */}
             <div
               className="rounded-2xl p-4"
-              style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
             >
               <h2 className="text-white font-extrabold text-base mb-2">Control de Servicio</h2>
               {servicioAbierto && servicio?.fecha_inicio && (
@@ -535,7 +537,7 @@ export default function AdminPage() {
                     <div
                       key={s.label}
                       className="rounded-2xl p-3 text-center"
-                      style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                     >
                       <p className="font-extrabold text-xl" style={{ color: s.color }}>
                         {s.value}
@@ -550,7 +552,7 @@ export default function AdminPage() {
                   Object.keys(dashboard.ordenesPorEstado).length > 0 && (
                     <div
                       className="rounded-2xl p-4"
-                      style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                     >
                       <h2 className="text-white font-extrabold text-base mb-3">Órdenes activas</h2>
                       <div className="flex flex-col gap-2">
@@ -678,7 +680,7 @@ export default function AdminPage() {
                   key={l.href}
                   href={l.href}
                   className="rounded-2xl p-4 flex items-center gap-3 transition-all active:scale-95"
-                  style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -706,8 +708,8 @@ export default function AdminPage() {
               </h2>
               <button
                 onClick={fetchOrdenes}
-                className="text-gray-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg transition"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg transition"
+                style={{ background: 'var(--border-color)', color: 'var(--text-secondary)' }}
               >
                 Actualizar
               </button>
@@ -725,7 +727,7 @@ export default function AdminPage() {
                     <div
                       key={orden.id}
                       className="rounded-2xl p-4"
-                      style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.06)' }}
+                      style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
                     >
                       {/* Row: número + estado + detalle */}
                       <div className="flex items-center justify-between mb-2">
@@ -746,7 +748,7 @@ export default function AdminPage() {
                         <button
                           onClick={() => abrirDetalle(orden)}
                           className="w-7 h-7 rounded-lg flex items-center justify-center transition hover:opacity-80"
-                          style={{ background: 'rgba(255,255,255,0.07)', color: '#9CA3AF' }}
+                          style={{ background: 'var(--border-color)', color: 'var(--text-secondary)' }}
                           title="Ver / editar productos"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -855,12 +857,12 @@ export default function AdminPage() {
           {/* panel */}
           <div
             className="relative w-full max-w-md flex flex-col overflow-hidden"
-            style={{ background: '#141414', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--bg-secondary)', borderLeft: '1px solid var(--border-color)' }}
           >
             {/* Header */}
             <div
               className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ borderBottom: '1px solid var(--border-color)' }}
             >
               <div>
                 <p className="text-xs text-orange-400 font-bold uppercase tracking-wider">
@@ -883,7 +885,7 @@ export default function AdminPage() {
                 <button
                   onClick={cerrarDetalle}
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-white transition"
-                  style={{ background: 'rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--border-color)' }}
                 >
                   ✕
                 </button>
@@ -895,7 +897,7 @@ export default function AdminPage() {
 
               {/* Client info */}
               {(panelOrden.nombre_cliente || panelOrden.direccion_entrega || panelOrden.notas_orden) && (
-                <div className="rounded-xl p-3 flex flex-col gap-1" style={{ background: '#1A1A1A' }}>
+                <div className="rounded-xl p-3 flex flex-col gap-1" style={{ background: 'var(--bg-card)' }}>
                   {panelOrden.nombre_cliente && (
                     <p className="text-white text-sm font-bold">{panelOrden.nombre_cliente}</p>
                   )}
@@ -936,8 +938,8 @@ export default function AdminPage() {
                           onClick={() => { setAddTipo(t); setAddId('') }}
                           className="flex-1 py-1.5 rounded-lg text-xs font-bold transition"
                           style={{
-                            background: addTipo === t ? '#F28500' : 'rgba(255,255,255,0.06)',
-                            color: addTipo === t ? 'white' : '#9CA3AF',
+                            background: addTipo === t ? '#F28500' : 'var(--border-color)',
+                            color: addTipo === t ? 'white' : 'var(--text-secondary)',
                           }}
                         >
                           {t === 'producto' ? 'Producto' : 'Combo'}
@@ -947,8 +949,8 @@ export default function AdminPage() {
                     <select
                       value={addId}
                       onChange={(e) => setAddId(e.target.value ? Number(e.target.value) : '')}
-                      className="w-full rounded-lg px-3 py-2 text-sm text-white focus:outline-none"
-                      style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)' }}
+                      className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none"
+                      style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                     >
                       <option value="">Selecciona {addTipo === 'producto' ? 'un producto' : 'un combo'}…</option>
                       {(addTipo === 'producto' ? menuProductos : menuCombos).map((item) => (
@@ -959,8 +961,8 @@ export default function AdminPage() {
                       <input
                         type="number" min={1} value={addCantidad}
                         onChange={(e) => setAddCantidad(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-20 rounded-lg px-3 py-2 text-sm text-white text-center focus:outline-none"
-                        style={{ background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.1)' }}
+                        className="w-20 rounded-lg px-3 py-2 text-sm text-center focus:outline-none"
+                        style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                       />
                       <button
                         onClick={agregarItem}
@@ -983,7 +985,7 @@ export default function AdminPage() {
                     <div
                       key={d.productoId}
                       className="rounded-xl px-3 py-2.5 flex items-center gap-3"
-                      style={{ background: '#1A1A1A' }}
+                      style={{ background: 'var(--bg-card)' }}
                     >
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-sm font-semibold truncate">{d.nombre}</p>
@@ -1028,7 +1030,7 @@ export default function AdminPage() {
                     <div
                       key={c.comboId}
                       className="rounded-xl px-3 py-2.5 flex items-center gap-3"
-                      style={{ background: '#1A1A1A' }}
+                      style={{ background: 'var(--bg-card)' }}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
@@ -1076,7 +1078,7 @@ export default function AdminPage() {
               {/* Total */}
               <div
                 className="rounded-xl px-4 py-3 flex items-center justify-between"
-                style={{ background: '#1A1A1A' }}
+                style={{ background: 'var(--bg-card)' }}
               >
                 <p className="text-gray-400 text-sm font-semibold">Total</p>
                 <p className="text-white font-extrabold text-lg" style={{ color: '#F28500' }}>
@@ -1093,7 +1095,7 @@ export default function AdminPage() {
             {canEdit(panelOrden) && (
               <div
                 className="flex-shrink-0 px-4 py-3"
-                style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ borderTop: '1px solid var(--border-color)' }}
               >
                 <button
                   onClick={guardarItems}
