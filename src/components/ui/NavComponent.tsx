@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext'
 import BullLogo from './BullLogo'
 import ThemeToggle from './ThemeToggle'
 import apiClient from '@/lib/api/client'
+import { useTheme } from '@/context/ThemeContext'
 
 interface NavComponentProps {
   title?: string
@@ -21,9 +22,14 @@ const STAFF_DASHBOARD: Record<string, string> = {
 
 export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps) {
   const { totalItems } = useCart()
+  const { theme } = useTheme()
   const router = useRouter()
   const [usuario, setUsuario] = useState<{ email: string; rol: string } | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const btnBg      = theme === 'dark' ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.28)'
+  const btnBgHover = theme === 'dark' ? 'rgba(0,0,0,0.40)' : 'rgba(255,255,255,0.45)'
+  const cartBg     = theme === 'dark' ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.22)'
 
   useEffect(() => {
     try {
@@ -72,8 +78,10 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Menú de usuario"
-                className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 transition hover:bg-black/20"
-                style={{ background: 'rgba(0,0,0,0.25)' }}
+                className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 transition"
+                style={{ background: btnBg }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = btnBgHover)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = btnBg)}
               >
                 <span
                   className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0"
@@ -143,8 +151,10 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
           ) : (
             <Link
               href="/login"
-              className="rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-black/20"
-              style={{ background: 'rgba(0,0,0,0.25)' }}
+              className="rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wide text-white transition"
+              style={{ background: btnBg }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = btnBgHover)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = btnBg)}
             >
               Iniciar sesión
             </Link>
@@ -153,8 +163,10 @@ export default function NavComponent({ title = 'I KE TACOS' }: NavComponentProps
           {/* Cart */}
           <Link
             href="/cart"
-            className="relative p-2.5 rounded-xl hover:bg-black/20 transition-colors"
-            style={{ background: 'rgba(0,0,0,0.15)' }}
+            className="relative p-2.5 rounded-xl transition-colors"
+            style={{ background: cartBg }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = btnBgHover)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = cartBg)}
             aria-label={`Carrito — ${totalItems} producto${totalItems !== 1 ? 's' : ''}`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
