@@ -493,18 +493,34 @@ export default function MisPedidosPage() {
                 Crear cuenta
               </Link>
               <Link
-                href="/mis-pedidos-guest"
-                className="w-full py-3 rounded-2xl font-bold text-sm text-center transition-all active:scale-95"
-                style={{ color: '#6B7280' }}
-              >
-                Buscar pedido como invitado →
-              </Link>
-              <Link
                 href="/menu"
                 className="w-full py-2 rounded-2xl font-medium text-xs text-center transition-all active:scale-95"
                 style={{ color: '#4B5563' }}
               >
                 Continuar sin cuenta →
+              </Link>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex-1 h-px" style={{ background: 'var(--border-color)' }} />
+                <span className="text-xs font-semibold" style={{ color: '#4B5563' }}>o</span>
+                <div className="flex-1 h-px" style={{ background: 'var(--border-color)' }} />
+              </div>
+
+              <Link
+                href="/mis-pedidos-guest"
+                className="w-full py-3 rounded-2xl font-extrabold text-sm flex items-center justify-center gap-2.5 transition-all active:scale-95"
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                Buscar pedido como invitado
               </Link>
             </div>
           </div>
