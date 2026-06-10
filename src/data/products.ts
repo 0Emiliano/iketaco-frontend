@@ -30,3 +30,20 @@ export const getPromociones = async (): Promise<Promocion[]> => {
   const res = await apiClient.get('/menu/promociones')
   return res.data
 }
+
+export interface BannerConfig {
+  titulo: string
+  subtitulo: string
+  badge: string
+  featuredPromoId: number | null
+  imagenUrl: string | null
+}
+
+export const getBannerConfig = async (): Promise<BannerConfig | null> => {
+  try {
+    const res = await apiClient.get('/admin/settings/banner')
+    return res.data ?? null
+  } catch {
+    return null
+  }
+}
