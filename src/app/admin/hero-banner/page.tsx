@@ -219,7 +219,7 @@ function ImageUploader({
             alt="Banner background"
             fill
             className="object-cover"
-            unoptimized={imagenUrl.startsWith('blob:')}
+            unoptimized
           />
           {/* Dark overlay */}
           <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)' }} />

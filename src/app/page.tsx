@@ -3,6 +3,9 @@ import NavComponent from '@/components/ui/NavComponent'
 import HeroBanner from '@/components/home/HeroBanner'
 import PopularSection from '@/components/home/PopularSection'
 
+// Re-fetch banner config and promos on every request so admin changes appear immediately
+export const dynamic = 'force-dynamic'
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] flex flex-col">
